@@ -1,76 +1,59 @@
 "use client";
 
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import BottomNav from "@/components/bottom-nav";
 import { BrandHeader, Chip, Stamp } from "@/components/ui";
-import { PURPOSES, type Purpose } from "@/lib/config";
+import { PURPOSES, PURPOSE_INFO, type Purpose } from "@/lib/config";
+import { conditionParts, type Prefs } from "@/lib/prefs";
 import { createClient } from "@/lib/supabase/client";
 
 // Figma 04 · 홈 / 신청 (2:57)
 export type HomeData = {
   nickname: string;
   dateLabel: string; // "WED, OCT 14"
-  matchDate: string; // 신청 대상 날짜 (내일, YYYY-MM-DD)
   applied: boolean;
-  purpose: Purpose;
-  sameGenderOnly: boolean;
+  prefs: Prefs;
   weekConnections: number | null;
 };
 
-// 디자인 표기: 친구 / 밥 / 스터디
-const PURPOSE_LABEL: Record<Purpose, string> = { friend: "친구", meal: "밥", study: "스터디" };
-
 export default function HomeView({ data, preview = false }: { data: HomeData; preview?: boolean }) {
+  const router = useRouter();
   const [applied, setApplied] = useState(data.applied);
-  const [purpose, setPurpose] = useState<Purpose>(data.purpose);
-  const [sameGender, setSameGender] = useState(data.sameGenderOnly);
-  const [editing, setEditing] = useState(false);
+  const [purpose, setPurpose] = useState<Purpose>(data.prefs.purpose);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // 신청 = match_pool 행 추가, 취소 = 삭제. 조건 변경은 삭제 후 다시 추가.
-  async function save(next: { applied: boolean; purpose: Purpose; sameGender: boolean }) {
+  async function toggleApplied() {
     setError(null);
-    if (preview) return true;
+    if (preview) {
+      setApplied(!applied);
+      return;
+    }
     setBusy(true);
     const supabase = createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) {
-      setBusy(false);
-      return false;
-    }
-    await supabase.from("match_pool").delete().eq("user_id", user.id).eq("match_date", data.matchDate);
-    if (next.applied) {
-      const { error } = await supabase.from("match_pool").insert({
-        user_id: user.id,
-        match_date: data.matchDate,
-        purpose: next.purpose,
-        same_gender_only: next.sameGender,
-      });
-      if (error) {
-        setBusy(false);
-        setError("신청하지 못했어요. 가입·본인인증을 마쳤는지 확인해 주세요.");
-        return false;
-      }
-    }
+    const { error } = applied
+      ? await supabase.rpc("cancel_match")
+      : await supabase.rpc("apply_match", { p_purpose: purpose });
     setBusy(false);
-    return true;
+    if (error) return setError("신청하지 못했어요. 잠시 후 다시 시도해 주세요.");
+    if (!applied) router.push("/match/applied");
+    setApplied(!applied);
   }
 
-  async function toggleApplied() {
-    const next = !applied;
-    if (await save({ applied: next, purpose, sameGender })) setApplied(next);
-  }
   async function choosePurpose(p: Purpose) {
     setPurpose(p);
-    if (applied) await save({ applied, purpose: p, sameGender });
-  }
-  async function toggleSameGender() {
-    const next = !sameGender;
-    setSameGender(next);
-    if (applied) await save({ applied, purpose, sameGender: next });
+    if (preview) return;
+    const supabase = createClient();
+    // 이미 신청했다면 목적을 바꿔 다시 신청, 아니면 설정만 저장
+    if (applied) await supabase.rpc("apply_match", { p_purpose: p });
+    else {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (user) await supabase.from("profiles").update({ pref_purpose: p }).eq("id", user.id);
+    }
   }
 
   return (
@@ -78,9 +61,7 @@ export default function HomeView({ data, preview = false }: { data: HomeData; pr
       <BrandHeader title={`안녕하세요, ${data.nickname}님`} badge="1:1" />
 
       <section className="px-6 pt-[18px]">
-        <p className="font-label text-[12px] whitespace-pre">
-          {`${data.dateLabel}  ·  오늘의 교점`}
-        </p>
+        <p className="font-label text-[12px] whitespace-pre">{`${data.dateLabel}  ·  오늘의 교점`}</p>
         <h2 className="font-display mt-1 text-[29px] leading-[1.45]">
           내일도 새로운 학우를
           <br />
@@ -137,7 +118,7 @@ export default function HomeView({ data, preview = false }: { data: HomeData; pr
                 onClick={() => choosePurpose(p.value)}
                 className={p.value === "friend" ? "w-20" : p.value === "meal" ? "w-[70px]" : "w-[88px]"}
               >
-                {PURPOSE_LABEL[p.value]}
+                {PURPOSE_INFO[p.value].label}
               </Chip>
             ))}
           </div>
@@ -145,39 +126,29 @@ export default function HomeView({ data, preview = false }: { data: HomeData; pr
       </section>
 
       {/* match conditions */}
-      <section className="mx-6 mt-[26px] rounded-[12px] border-[1.5px] border-ink bg-card px-[16.5px] pt-[13.5px] pb-4">
+      <Link
+        href="/match/conditions"
+        className="mx-6 mt-[26px] block rounded-[12px] border-[1.5px] border-ink bg-card px-[16.5px] pt-[13.5px] pb-4"
+      >
         <h3 className="text-[16px] font-bold">매칭 조건</h3>
-        <p className="mt-[14px] text-[13px] whitespace-pre text-muted">
-          {`${sameGender ? "같은 성별만" : "성별 무관"}   ·   같은 학과 포함   ·   학년 무관`}
-        </p>
-        {editing && (
-          <label className="mt-3 flex items-center gap-2 text-[13px]">
-            <input type="checkbox" checked={sameGender} onChange={toggleSameGender} disabled={busy} />
-            같은 성별과만 매칭
-          </label>
-        )}
-        <button
-          type="button"
-          onClick={() => setEditing((v) => !v)}
-          className="mt-[18px] text-[13px] font-bold whitespace-pre"
-        >
-          {editing ? "닫기" : "조건 수정  →"}
-        </button>
-      </section>
+        <p className="mt-[14px] text-[13px] whitespace-pre text-muted">{conditionParts(data.prefs).join("   ·   ")}</p>
+        <p className="mt-[18px] text-[13px] font-bold whitespace-pre">{"조건 수정  →"}</p>
+      </Link>
 
       {/* social proof */}
-      <section className="relative mx-6 mt-5 h-[87px] rounded-[6px] border-2 border-ink bg-ink px-4 pt-[14px] text-card">
-        <p className="font-display text-[21px]">
-          이번 주 {data.weekConnections ?? "-"}쌍
-        </p>
+      <Link
+        href="/stats"
+        className="relative mx-6 mt-5 block h-[87px] rounded-[6px] border-2 border-ink bg-ink px-4 pt-[14px] text-card"
+      >
+        <p className="font-display text-[21px]">이번 주 {data.weekConnections ?? "-"}쌍</p>
         <p className="text-[13px] font-medium">새로운 친구가 되었어요</p>
-        <div className="absolute -top-[13px] right-[-2px]">
+        <span className="absolute -top-[13px] right-[-2px]">
           <Stamp rotate={6}>01 / DAILY RANDOM</Stamp>
-        </div>
-      </section>
+        </span>
+      </Link>
 
       <p className="mt-[26px] text-center text-[12px] text-muted">매칭 발표는 매일 낮 12시</p>
-      {error && <p className="mt-2 text-center text-[12px] text-orange">{error}</p>}
+      {error && <p className="mt-2 text-center text-[12px] text-alert">{error}</p>}
 
       <BottomNav />
     </div>

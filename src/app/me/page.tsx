@@ -1,13 +1,26 @@
-import BottomNav from "@/components/bottom-nav";
-import { BrandHeader } from "@/components/ui";
+import { requireActive } from "@/lib/session";
+import MeView from "./view";
 
-// Figma 08 · 내 정보 — 다음 작업에서 디자인 반영 예정
-export default function MePage() {
+export const dynamic = "force-dynamic";
+
+export default async function MePage() {
+  const { supabase, user } = await requireActive();
+  const { data: me } = await supabase
+    .from("profiles")
+    .select("nickname, dept, grade, auto_join, pref_same_gender_only, identity_verified_at, school_verified_at")
+    .eq("id", user.id)
+    .maybeSingle();
+
   return (
-    <div className="min-h-dvh bg-paper pb-[100px]">
-      <BrandHeader title="내 정보" badge="ME" />
-      <p className="px-6 pt-8 text-[14px] text-muted">프로필·카카오톡 ID·차단 목록 화면을 준비하고 있어요.</p>
-      <BottomNav />
-    </div>
+    <MeView
+      data={{
+        nickname: me?.nickname ?? "학우",
+        dept: me?.dept ?? "",
+        grade: me?.grade ?? 1,
+        autoJoin: me?.auto_join ?? false,
+        sameGenderOnly: me?.pref_same_gender_only ?? false,
+        verified: Boolean(me?.identity_verified_at && me?.school_verified_at),
+      }}
+    />
   );
 }

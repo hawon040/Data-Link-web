@@ -1,47 +1,26 @@
-import { notFound, redirect } from "next/navigation";
-import { isSupabaseConfigured } from "@/lib/config";
-import { createClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
+import { loadMatch } from "@/lib/match";
 import ChatRoom, { type Message } from "./chat-room";
 
 export const dynamic = "force-dynamic";
 
-export default async function ChatPage({
-  params,
-}: {
-  params: Promise<{ matchId: string }>;
-}) {
+// Figma 06 · 익명 대화 / 20 · 메시지 전송 상태 / 46 · 채팅 입력
+export default async function ChatPage({ params }: { params: Promise<{ matchId: string }> }) {
   const { matchId } = await params;
-  if (!isSupabaseConfigured()) redirect("/signup");
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/signup");
+  const { supabase, user, match, partnerName, expired } = await loadMatch(matchId);
+  if (expired) redirect(`/chat/${matchId}/ended`);
 
-  const { data: match } = await supabase
-    .from("matches")
-    .select("id, user_a, user_b, expires_at, status")
-    .eq("id", matchId)
-    .maybeSingle();
-  if (!match) notFound();
-
-  const partnerId = match.user_a === user.id ? match.user_b : match.user_a;
-
-  const [{ data: messages }, { data: partner }] = await Promise.all([
-    supabase
-      .from("messages")
-      .select("id, sender_id, body, created_at")
-      .eq("match_id", matchId)
-      .order("created_at"),
-    supabase.from("profiles").select("nickname").eq("id", partnerId).single(),
-  ]);
+  const { data: messages } = await supabase
+    .from("messages")
+    .select("id, sender_id, body, created_at")
+    .eq("match_id", matchId)
+    .order("created_at");
 
   return (
     <ChatRoom
       matchId={matchId}
       myId={user.id}
-      partnerId={partnerId}
-      partnerName={partner?.nickname ?? "학우"}
+      partnerName={partnerName}
       expiresAt={match.expires_at}
       initialMessages={(messages ?? []) as Message[]}
     />

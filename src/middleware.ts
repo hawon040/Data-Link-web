@@ -2,7 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 // 로그인이 필요한 경로
-const PROTECTED = ["/home", "/today", "/chat", "/me"];
+const PROTECTED = ["/home", "/today", "/chat", "/me", "/match", "/stats", "/signup/phone", "/signup/verified", "/signup/profile", "/signup/kakao"];
 
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({ request });
@@ -37,7 +37,7 @@ export async function middleware(request: NextRequest) {
   );
   if (needsLogin && !user) {
     const login = request.nextUrl.clone();
-    login.pathname = "/signup";
+    login.pathname = "/";
     return NextResponse.redirect(login);
   }
 

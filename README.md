@@ -35,8 +35,9 @@ npm run dev                  # http://localhost:3000
 - 원본: [교점 | 백석대 1:1 학우 매칭 모바일 웹](https://www.figma.com/design/j0zSbAXrx4epF4rogj18da)
 - 색·폰트 토큰: `src/app/globals.css` (ink, paper, card, lime, orange, muted, chip, mint / Noto Sans KR, Black Han Sans, Archivo 900, Anton)
 - 아이콘·도형: `public/figma/` (Figma에서 SVG로 추출)
-- 반영된 화면: 01 시작(`/`), 04 홈·신청(`/home`), 05 오늘의 학우(`/today`), 06 익명 대화(`/chat/[id]`), 07 연락처 교환(`/chat/[id]/exchange`)
-- Supabase 없이 화면 확인: `ENABLE_PREVIEW=1 npm run dev` 후 `/preview/home`, `/preview/today`, `/preview/today-empty`, `/preview/chat`, `/preview/exchange`
+- 반영된 화면: Figma 46개 전부 (가입 02·13·42·33·14·03·09·15·32, 홈·매칭 04·16·34·43·39·17·35·36·18·10·38, 대화 05·06·19·21·22·40·31·23·37, 교환·후기 07·24·25·26·11·41·12·30, 내 정보 08·27·44·45·28·29)
+- Supabase 없이 화면 확인: `npm run dev` 후 `/preview/01` ~ `/preview/46` (Figma 화면 번호와 같음)
+- 본인인증을 포트원 없이 테스트하려면 `IDENTITY_MOCK=1`, `NEXT_PUBLIC_IDENTITY_MOCK=1`
 
 ## 구조
 

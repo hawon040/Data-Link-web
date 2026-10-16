@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { BackHeader, BlockButton } from "@/components/ui";
 import { MESSAGE_LIMIT_PER_USER } from "@/lib/config";
@@ -29,7 +30,6 @@ function remainingLabel(expiresAt: string) {
 export default function ChatRoom({
   matchId,
   myId,
-  partnerId,
   partnerName,
   expiresAt,
   initialMessages,
@@ -37,7 +37,6 @@ export default function ChatRoom({
 }: {
   matchId: string;
   myId: string;
-  partnerId: string;
   partnerName: string;
   expiresAt: string;
   initialMessages: Message[];
@@ -101,25 +100,6 @@ export default function ChatRoom({
     setText("");
   }
 
-  async function report() {
-    const detail = prompt("신고 사유를 적어 주세요 (예: 욕설, 성희롱, 본인 ID가 아님)");
-    if (!detail || !supabase) return;
-    await supabase.from("reports").insert({
-      match_id: matchId,
-      reporter_id: myId,
-      reported_id: partnerId,
-      reason: "other",
-      detail,
-    });
-    alert("신고가 접수됐어요.");
-  }
-
-  async function block() {
-    if (!confirm("차단하면 대화가 끝나고 다시는 매칭되지 않아요.") || !supabase) return;
-    await supabase.from("blocks").insert({ blocker_id: myId, blocked_id: partnerId });
-    setError("차단했어요.");
-  }
-
   return (
     <div className="flex min-h-dvh flex-col bg-paper">
       <BackHeader title={`${partnerName}님과 대화`} badge="CHAT" backHref="/today" />
@@ -157,7 +137,7 @@ export default function ChatRoom({
 
       <div className="px-4 pb-[18px]">
         {exchangeOpen ? (
-          <BlockButton href={`/chat/${matchId}/exchange`}>카카오톡 ID 교환하러 가기</BlockButton>
+          <BlockButton href={preview ? "/preview/37" : `/chat/${matchId}/ended`}>대화 종료 · 교환 선택하기</BlockButton>
         ) : (
           <form
             className="flex h-[55px] items-center rounded-[8px] bg-orange pr-[14px] pl-4 shadow-block-sm"
@@ -185,15 +165,12 @@ export default function ChatRoom({
         {error && <p className="mt-2 text-center text-[12px] text-orange">{error}</p>}
       </div>
 
-      <div className="flex h-[77px] items-start justify-center gap-5 bg-card pt-[17px] text-[13px] font-medium text-muted">
-        <button type="button" onClick={report}>
-          신고
-        </button>
-        <span aria-hidden>·</span>
-        <button type="button" onClick={block}>
-          차단
-        </button>
-      </div>
+      <Link
+        href={preview ? "/preview/21" : `/chat/${matchId}/safety`}
+        className="flex h-[77px] justify-center gap-5 bg-card pt-[17px] text-[13px] font-medium whitespace-pre text-muted"
+      >
+        {"신고     ·     차단"}
+      </Link>
     </div>
   );
 }

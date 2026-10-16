@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation";
-import { isSupabaseConfigured } from "@/lib/config";
 import { kstDate, kstDateLabelKo } from "@/lib/date";
-import { createClient } from "@/lib/supabase/server";
+import { requireActive } from "@/lib/session";
 import TodayView, { type TodayData } from "./today-view";
 
 export const dynamic = "force-dynamic";
@@ -14,12 +13,7 @@ type Partner = {
 };
 
 export default async function TodayPage() {
-  if (!isSupabaseConfigured()) redirect("/signup");
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/signup");
+  const { supabase, user } = await requireActive();
 
   const [{ data: match }, { data: me }] = await Promise.all([
     supabase
@@ -29,6 +23,12 @@ export default async function TodayPage() {
       .maybeSingle(),
     supabase.from("profiles").select("interests").eq("id", user.id).maybeSingle(),
   ]);
+
+  // 신청했는데 짝이 없었던 날은 Figma 10 화면으로
+  if (!match) {
+    const { data: leftover } = await supabase.rpc("was_leftover_today");
+    if (leftover) redirect("/match/none");
+  }
 
   let view: TodayData["match"] = null;
   if (match) {
