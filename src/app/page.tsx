@@ -1,80 +1,71 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { Stamp } from "@/components/ui";
 import { isSupabaseConfigured } from "@/lib/config";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
-type Stats = {
-  today_applicants: number;
-  week_connections: number;
-  total_connections: number;
-};
+// Figma 01 · 시작 (2:3) — 장식용 원 위치는 디자인 좌표 그대로
+const BLOBS: { src: string; left: number; top: string }[] = [
+  { src: "/figma/ellipse-green.svg", left: -84, top: "-23px" },
+  { src: "/figma/ellipse-green.svg", left: 243, top: "34px" },
+  { src: "/figma/ellipse-cream.svg", left: -17, top: "77px" },
+  { src: "/figma/ellipse-green.svg", left: 149, top: "calc(50% - 126px)" },
+  { src: "/figma/ellipse-orange.svg", left: 57, top: "calc(50% - 65px)" },
+  { src: "/figma/ellipse-orange.svg", left: -129, top: "calc(50% + 51px)" },
+  { src: "/figma/ellipse-orange.svg", left: 276, top: "calc(50% + 74px)" },
+];
 
-async function getStats(): Promise<Stats | null> {
-  if (!isSupabaseConfigured()) return null;
-  try {
+export default async function StartPage() {
+  if (isSupabaseConfigured()) {
     const supabase = await createClient();
-    const { data } = await supabase.rpc("public_stats").single<Stats>();
-    return data ?? null;
-  } catch {
-    return null;
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (user) redirect("/home");
   }
-}
-
-export default async function Home() {
-  const stats = await getStats();
 
   return (
-    <div className="flex flex-col gap-8">
-      <header className="pt-10">
-        <h1 className="text-2xl font-bold">백석 랜덤매칭</h1>
-        <p className="mt-2 text-muted">
-          매일 정오, 백석대 학우 한 명과 1:1로 연결돼요.
+    <div className="relative min-h-dvh overflow-hidden bg-ink text-card">
+      <div className="absolute inset-y-0 left-1/2 w-[390px] -translate-x-1/2">
+        {BLOBS.map((b, i) => (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            key={i}
+            src={b.src}
+            width={200}
+            height={155}
+            alt=""
+            className="absolute"
+            style={{ left: b.left, top: b.top }}
+          />
+        ))}
+
+        <p className="font-poster absolute top-[calc(50%-163px)] w-full text-center text-[16px]">
+          ONE RANDOM MATCH / EVERY DAY
         </p>
-      </header>
+        <h1 className="font-poster absolute top-[calc(50%-77px)] w-full text-center text-[79px] leading-[1.45]">
+          RANPICK
+        </h1>
+        <div className="absolute top-[calc(50%+130px)] left-[90px]">
+          <Stamp tone="orange" rotate={7} className="w-[204px] h-[34px]">
+            BAEKSEOK VERIFIED
+          </Stamp>
+        </div>
+      </div>
 
-      <section className="grid grid-cols-2 gap-3">
-        <StatCard
-          label="오늘 신청한 학우"
-          value={stats ? `${stats.today_applicants}명` : "-"}
-        />
-        {/* 초기에는 주간·누적으로 보여주고, 숫자가 커지면 "어제"로 바꾼다 */}
-        <StatCard
-          label="이번 주 친구가 된 쌍"
-          value={stats ? `${stats.week_connections}쌍` : "-"}
-        />
-      </section>
-
-      <ol className="flex flex-col gap-2 text-sm text-muted">
-        <li>1. 오늘 밤 12시까지 매칭 신청</li>
-        <li>2. 내일 정오, 오늘의 학우 발표</li>
-        <li>3. 24시간 동안 각자 20개까지 대화</li>
-        <li>4. 둘 다 원하면 카카오톡 ID 교환</li>
-      </ol>
-
-      <div className="flex flex-col gap-3">
-        <Link
-          href="/today"
-          className="rounded-xl bg-accent py-3 text-center font-semibold text-white"
-        >
-          오늘의 학우 보기
-        </Link>
+      <div className="absolute inset-x-0 bottom-[60px] flex flex-col items-center gap-2.5 px-7">
         <Link
           href="/signup"
-          className="rounded-xl border py-3 text-center font-semibold"
+          className="flex h-[52px] w-full items-center justify-center rounded-[7px] border-[1.5px] border-ink bg-lime text-[15px] font-bold text-ink"
         >
-          처음이에요 · 가입하기
+          백석대 이메일로 시작하기
         </Link>
+        <p className="text-[13px] font-medium whitespace-pre">
+          ✓ 학교 인증 학우만    ✓ 연락처는 상호 동의 후
+        </p>
       </div>
-    </div>
-  );
-}
-
-function StatCard({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-xl border p-4">
-      <div className="text-xs text-muted">{label}</div>
-      <div className="mt-1 text-xl font-bold">{value}</div>
     </div>
   );
 }

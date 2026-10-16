@@ -1,8 +1,14 @@
 import type { Metadata, Viewport } from "next";
+import "@fontsource/noto-sans-kr/400.css";
+import "@fontsource/noto-sans-kr/500.css";
+import "@fontsource/noto-sans-kr/700.css";
+import "@fontsource/black-han-sans/400.css";
+import "@fontsource/archivo/900.css";
+import "@fontsource/anton/400.css";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "백석 랜덤매칭",
+  title: "RANPICK · 교점",
   description: "매일 정오, 백석대 학우 한 명과 1:1로 연결돼요.",
   manifest: "/manifest.webmanifest",
 };
@@ -10,7 +16,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#ffffff",
+  themeColor: "#0b0b0b",
 };
 
 export default function RootLayout({
@@ -19,7 +25,7 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body className="antialiased">
-        <main className="mx-auto min-h-dvh max-w-md px-4 py-6">{children}</main>
+        <div className="mx-auto min-h-dvh max-w-[430px]">{children}</div>
       </body>
     </html>
   );

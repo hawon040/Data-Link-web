@@ -27,22 +27,14 @@ export default async function ChatPage({
 
   const partnerId = match.user_a === user.id ? match.user_b : match.user_a;
 
-  const [{ data: messages }, { data: partner }, { data: myChoice }, { data: contact }] =
-    await Promise.all([
-      supabase
-        .from("messages")
-        .select("id, sender_id, body, created_at")
-        .eq("match_id", matchId)
-        .order("created_at"),
-      supabase.from("profiles").select("nickname").eq("id", partnerId).single(),
-      supabase
-        .from("exchange_choices")
-        .select("accepted")
-        .eq("match_id", matchId)
-        .eq("user_id", user.id)
-        .maybeSingle(),
-      supabase.rpc("get_partner_contact", { p_match_id: matchId }),
-    ]);
+  const [{ data: messages }, { data: partner }] = await Promise.all([
+    supabase
+      .from("messages")
+      .select("id, sender_id, body, created_at")
+      .eq("match_id", matchId)
+      .order("created_at"),
+    supabase.from("profiles").select("nickname").eq("id", partnerId).single(),
+  ]);
 
   return (
     <ChatRoom
@@ -52,8 +44,6 @@ export default async function ChatPage({
       partnerName={partner?.nickname ?? "학우"}
       expiresAt={match.expires_at}
       initialMessages={(messages ?? []) as Message[]}
-      initialChoice={myChoice?.accepted ?? null}
-      initialContact={(contact as string | null) ?? null}
     />
   );
 }

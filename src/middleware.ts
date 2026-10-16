@@ -2,7 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 // 로그인이 필요한 경로
-const PROTECTED = ["/today", "/chat"];
+const PROTECTED = ["/home", "/today", "/chat", "/me"];
 
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({ request });

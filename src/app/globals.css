@@ -1,33 +1,45 @@
 @import "tailwindcss";
 
-/* 실제 색·폰트는 Figma 디자인 확정 후 교체 */
+/* Figma "교점 | 백석대 1:1 학우 매칭 모바일 웹" 디자인 토큰 */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-  --muted: #6b7280;
-  --accent: #2563eb;
+  --ink: #0b0b0b;
+  --paper: #f5f2e9;
+  --card: #fffdf7;
+  --lime: #28f300;
+  --orange: #ff4b1f;
+  --muted: #55534e;
+  --chip: #ebe8df;
+  --mint: #ddfdd4;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-ink: var(--ink);
+  --color-paper: var(--paper);
+  --color-card: var(--card);
+  --color-lime: var(--lime);
+  --color-orange: var(--orange);
   --color-muted: var(--muted);
-  --color-accent: var(--accent);
+  --color-chip: var(--chip);
+  --color-mint: var(--mint);
+
+  --font-body: "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --font-display: "Black Han Sans", "Noto Sans KR", sans-serif;
+  --font-label: "Archivo", "Noto Sans KR", sans-serif;
+  --font-poster: "Anton", "Archivo", sans-serif;
+
+  --shadow-block: 3px 4px 0px 0px var(--ink);
+  --shadow-block-sm: 2px 3px 0px 0px var(--ink);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-    --muted: #9ca3af;
-    --accent: #60a5fa;
-  }
-}
-
+html,
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family:
-    "Pretendard", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo",
-    "Malgun Gothic", sans-serif;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  line-height: 1.45;
+}
+
+/* Archivo Black 표현: Archivo 900 */
+.font-label {
+  font-weight: 900;
 }

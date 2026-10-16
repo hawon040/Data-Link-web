@@ -30,6 +30,14 @@ npm run dev                  # http://localhost:3000
    ```
 4. Authentication → Email에서 OTP(인증번호) 메일 템플릿 사용
 
+## 디자인 (Figma)
+
+- 원본: [교점 | 백석대 1:1 학우 매칭 모바일 웹](https://www.figma.com/design/j0zSbAXrx4epF4rogj18da)
+- 색·폰트 토큰: `src/app/globals.css` (ink, paper, card, lime, orange, muted, chip, mint / Noto Sans KR, Black Han Sans, Archivo 900, Anton)
+- 아이콘·도형: `public/figma/` (Figma에서 SVG로 추출)
+- 반영된 화면: 01 시작(`/`), 04 홈·신청(`/home`), 05 오늘의 학우(`/today`), 06 익명 대화(`/chat/[id]`), 07 연락처 교환(`/chat/[id]/exchange`)
+- Supabase 없이 화면 확인: `ENABLE_PREVIEW=1 npm run dev` 후 `/preview/home`, `/preview/today`, `/preview/today-empty`, `/preview/chat`, `/preview/exchange`
+
 ## 구조
 
 ```
@@ -62,7 +70,7 @@ docs/                     기획·결정·법적 검토
 
 - [ ] 포트원 통합 본인인증 연동 (`/api/identity` + 서버에서 profiles 생성)
 - [ ] 프로필 작성 화면 (닉네임, 학과, 학년, 관심사, 소개)
-- [ ] Figma 디자인 반영
+- [ ] Figma 나머지 화면 반영 (02·03 인증, 08 내 정보, 09~46 상태 화면)
 - [ ] Web Push 알림 (정오 매칭 발표)
 - [ ] 카카오톡 ID 암호화 (Supabase Vault)
 - [ ] 후기 화면, 신고 사유 선택 UI

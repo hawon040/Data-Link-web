@@ -69,7 +69,7 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6 pt-6">
+    <div className="flex min-h-dvh flex-col gap-6 bg-paper px-6 pt-12">
       <h1 className="text-xl font-bold">가입하기</h1>
       <StepBar step={step} />
 
@@ -93,7 +93,7 @@ export default function SignupPage() {
             />
           )}
           <button
-            className="rounded-xl bg-accent py-3 font-semibold text-white"
+            className="rounded-xl bg-ink py-3 font-semibold text-white"
             onClick={codeSent ? verifyCode : sendCode}
           >
             {codeSent ? "인증하기" : "인증번호 받기"}
@@ -108,7 +108,7 @@ export default function SignupPage() {
             전화번호는 상대에게 절대 공개되지 않아요.
           </p>
           <button
-            className="rounded-xl bg-accent py-3 font-semibold text-white"
+            className="rounded-xl bg-ink py-3 font-semibold text-white"
             onClick={startIdentityVerification}
           >
             본인인증 하기
@@ -130,7 +130,7 @@ export default function SignupPage() {
             프로필 관리에서 &quot;ID 검색 허용&quot;을 켜 주세요.
           </p>
           <button
-            className="rounded-xl bg-accent py-3 font-semibold text-white"
+            className="rounded-xl bg-ink py-3 font-semibold text-white"
             onClick={saveKakaoId}
           >
             저장하고 시작하기
@@ -143,14 +143,14 @@ export default function SignupPage() {
           <p>가입이 끝났어요. 오늘 밤 12시까지 매칭을 신청해 보세요.</p>
           <a
             href="/today"
-            className="rounded-xl bg-accent py-3 text-center font-semibold text-white"
+            className="rounded-xl bg-ink py-3 text-center font-semibold text-white"
           >
             매칭 신청하러 가기
           </a>
         </section>
       )}
 
-      {error && <p className="text-sm text-red-500">{error}</p>}
+      {error && <p className="text-sm text-orange">{error}</p>}
     </div>
   );
 }
@@ -169,7 +169,7 @@ function StepBar({ step }: { step: Step }) {
         <li
           key={s.key}
           className={`flex-1 rounded-full py-1 text-center ${
-            i <= current ? "bg-accent text-white" : "border text-muted"
+            i <= current ? "bg-ink text-card" : "border text-muted"
           }`}
         >
           {s.label}
