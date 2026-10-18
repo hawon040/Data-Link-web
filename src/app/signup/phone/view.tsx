@@ -4,57 +4,69 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Card, Headline, Screen } from "@/components/screen";
 import { BlockButton } from "@/components/ui";
-import { IDENTITY_MOCK } from "@/lib/config";
 
 // Figma 33 · 휴대폰 인증 분기 (13:83)
-// 실제 서비스: 포트원 본인인증 창 → /api/identity 가 결과를 확인하고 자동 분기
-// 개발·데모(IDENTITY_MOCK): Figma 프로토타입처럼 결과 두 가지를 눌러볼 수 있음
-export default function PhoneView({ preview = false }: { preview?: boolean }) {
+// 포트원 V2 · KG이니시스 통합인증 창 → /api/identity 가 포트원에서 결과를 직접 조회하고 자동 분기
+// 인증 수단은 PASS(통신사)로 고정: 카카오·네이버는 성별을 사용자가 직접 입력해 검증되지 않아 같은 성별 매칭에 쓸 수 없다.
+// 만 19세 판정은 인증 결과의 생년월일로 DB(complete_identity)가 한다. 번호는 저장하지 않고, 인증한 번호와 같은지만 서버가 확인한다.
+
+// 숫자만 남기고 010-1234-5678 형태로 표시
+function formatPhone(digits: string) {
+  if (digits.length < 4) return digits;
+  if (digits.length < 8) return `${digits.slice(0, 3)}-${digits.slice(3)}`;
+  if (digits.length === 10) return `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6)}`;
+  return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`;
+}
+
+export const IDENTITY_ERRORS: Record<string, string> = {
+  duplicate: "이미 다른 계정으로 인증된 휴대폰이에요.",
+  mismatch: "입력한 번호와 인증한 휴대폰 번호가 달라요.",
+  unavailable: "본인인증 서비스를 준비 중이에요. 잠시 후 다시 시도해 주세요.",
+};
+
+export default function PhoneView({ userId, preview = false }: { userId?: string; preview?: boolean }) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const mock = preview || IDENTITY_MOCK;
+  const [phone, setPhone] = useState("");
+  const phoneValid = /^01[016789]\d{7,8}$/.test(phone);
 
-  async function finish(body: object) {
-    const res = await fetch("/api/identity", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify(body),
-    });
-    const { result } = await res.json().catch(() => ({ result: "error" }));
-    if (result === "ok") router.push("/signup/verified");
-    else if (result === "underage") router.push("/signup/age-limit");
-    else if (result === "duplicate") setError("이미 다른 계정으로 인증된 휴대폰이에요.");
-    else setError("인증을 확인하지 못했어요. 다시 시도해 주세요.");
-  }
+  async function verify() {
+    if (preview) return router.push("/preview/14");
+    const storeId = process.env.NEXT_PUBLIC_PORTONE_STORE_ID;
+    const channelKey = process.env.NEXT_PUBLIC_PORTONE_CHANNEL_KEY;
+    if (!storeId || !channelKey || !userId) return setError(IDENTITY_ERRORS.unavailable);
 
-  async function verifyWithPortOne() {
     setError(null);
     setBusy(true);
     try {
       const PortOne = await import("@portone/browser-sdk/v2");
       const id = `identity-${crypto.randomUUID()}`;
       const res = await PortOne.requestIdentityVerification({
-        storeId: process.env.NEXT_PUBLIC_PORTONE_STORE_ID!,
-        channelKey: process.env.NEXT_PUBLIC_PORTONE_CHANNEL_KEY,
+        storeId,
+        channelKey,
         identityVerificationId: id,
+        customer: { phoneNumber: phone },
+        customData: JSON.stringify({ uid: userId, phone }),
+        bypass: { inicisUnified: { flgFixedUser: "N", directAgency: "PASS", FRGNDInfo: "N" } },
         redirectUrl: `${window.location.origin}/signup/phone/complete`,
       });
-      if (!res || ("code" in res && res.code)) {
+      if (!res || res.code !== undefined) {
         setError("본인인증이 취소됐거나 실패했어요.");
         return;
       }
-      await finish({ identityVerificationId: id });
+      const r = await fetch("/api/identity", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ identityVerificationId: id }),
+      });
+      const { result } = await r.json().catch(() => ({ result: "error" }));
+      if (result === "ok") router.push("/signup/verified");
+      else if (result === "underage") router.push("/signup/age-limit");
+      else setError(IDENTITY_ERRORS[result] ?? "인증을 확인하지 못했어요. 다시 시도해 주세요.");
     } finally {
       setBusy(false);
     }
-  }
-
-  async function mockResult(kind: "adult" | "minor") {
-    if (preview) return router.push(kind === "adult" ? "/preview/14" : "/preview/03");
-    setBusy(true);
-    await finish({ mock: kind });
-    setBusy(false);
   }
 
   return (
@@ -63,20 +75,9 @@ export default function PhoneView({ preview = false }: { preview?: boolean }) {
       badge="19+"
       backHref="/signup"
       footer={
-        mock ? (
-          <>
-            <BlockButton onClick={() => mockResult("adult")} disabled={busy}>
-              만 19세 이상 결과
-            </BlockButton>
-            <BlockButton tone="card" onClick={() => mockResult("minor")} disabled={busy}>
-              만 19세 미만 결과
-            </BlockButton>
-          </>
-        ) : (
-          <BlockButton onClick={verifyWithPortOne} disabled={busy}>
-            휴대폰으로 인증하기
-          </BlockButton>
-        )
+        <BlockButton onClick={verify} disabled={busy || !phoneValid}>
+          휴대폰으로 인증하기
+        </BlockButton>
       }
     >
       <Headline
@@ -98,18 +99,24 @@ export default function PhoneView({ preview = false }: { preview?: boolean }) {
         }
       />
       <Card className="mt-[45px] pt-3 pb-[18px]">
-        <span className="block text-[12px] font-medium text-muted">휴대폰 번호</span>
-        <span className="mt-[14px] block text-[16px] font-medium">010-••••-••••</span>
+        <label className="block">
+          <span className="block text-[12px] font-medium text-muted">휴대폰 번호</span>
+          <input
+            type="tel"
+            inputMode="numeric"
+            autoComplete="tel-national"
+            placeholder="010-0000-0000"
+            maxLength={13}
+            value={formatPhone(phone)}
+            onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 11))}
+            className="mt-[14px] w-full bg-transparent text-[16px] font-medium placeholder:text-ink/40 focus:outline-none"
+          />
+        </label>
       </Card>
-      {mock && (
-        <Card className="mt-[39px] pb-[30px]">
-          <p className="text-[14px] font-bold">프로토타입 결과 미리보기</p>
-          <p className="mt-[14px] text-[13px] text-muted">
-            화면 흐름을 확인할 수 있도록 인증 결과
-            <br />두 가지를 눌러볼 수 있어요.
-          </p>
-        </Card>
+      {phone.length >= 10 && !phoneValid && (
+        <p className="mt-2 text-[12px] text-alert">휴대폰 번호를 다시 확인해 주세요.</p>
       )}
+      <p className="mt-3 text-[12px] text-muted">PASS(통신사) 인증 창이 열려요. 입력한 번호로 인증해 주세요.</p>
       {error && <p className="mt-3 text-[12px] text-alert">{error}</p>}
     </Screen>
   );

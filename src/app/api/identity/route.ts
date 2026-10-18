@@ -4,29 +4,41 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
 // 휴대폰 본인인증 결과 확인 → DB 저장
-//   body: { identityVerificationId } (포트원 V2)
-//   개발용: IDENTITY_MOCK=1 일 때 { mock: "adult" | "minor" }
-// 응답: { result: "ok" | "underage" | "duplicate" | "error" }
+//   body: { identityVerificationId } (포트원 V2, KG이니시스 통합인증 · PASS)
+// 응답: { result: "ok" | "underage" | "duplicate" | "mismatch" | "unavailable" | "error" }
+//
+// 클라이언트가 보낸 값은 믿지 않고, 포트원 API로 인증 건을 직접 조회해서 판단한다.
+//   GET https://api.portone.io/identity-verifications/{id}  (Authorization: PortOne {secret})
+//   응답 스키마: VerifiedIdentityVerification.verifiedCustomer { birthDate(yyyy-MM-dd), gender(MALE|FEMALE|OTHER), ci, phoneNumber(숫자만) }
+// customData 에는 인증 창을 연 계정 id와 입력한 번호가 들어 있다 (view.tsx). 다른 계정의 인증 건을 가져다 쓰는 것을 막는다.
 
 type Verified = { birthDate: string; gender: "M" | "F"; ci: string };
+type Failure = "mismatch" | "unavailable" | "error";
 
-async function fetchPortOne(id: string): Promise<Verified | null> {
+async function fetchPortOne(id: string, userId: string): Promise<Verified | Failure> {
   const secret = process.env.PORTONE_API_SECRET;
-  if (!secret) return null;
+  if (!secret) return "unavailable";
+
   const res = await fetch(`https://api.portone.io/identity-verifications/${encodeURIComponent(id)}`, {
     headers: { Authorization: `PortOne ${secret}` },
     cache: "no-store",
   });
-  if (!res.ok) return null;
+  if (!res.ok) return "error";
   const body = await res.json();
-  // TODO: 포트원 계약 후 실제 응답 필드명 확인 (verifiedCustomer.birthDate / gender / ci)
-  if (body.status !== "VERIFIED" || !body.verifiedCustomer) return null;
+  if (body.status !== "VERIFIED" || !body.verifiedCustomer) return "error";
+
+  let custom: { uid?: unknown; phone?: unknown } = {};
+  try {
+    custom = JSON.parse(body.customData ?? "{}");
+  } catch {}
+  if (custom.uid !== userId) return "error";
+
   const c = body.verifiedCustomer;
-  return {
-    birthDate: c.birthDate,
-    gender: c.gender === "FEMALE" ? "F" : "M",
-    ci: c.ci,
-  };
+  if (typeof custom.phone !== "string" || c.phoneNumber !== custom.phone) return "mismatch";
+  // 같은 성별 매칭에 쓰므로 인증기관이 확인한 성별·CI가 있어야 한다 (PASS는 항상 제공)
+  if (!c.ci || !c.birthDate || (c.gender !== "MALE" && c.gender !== "FEMALE")) return "error";
+
+  return { birthDate: c.birthDate, gender: c.gender === "FEMALE" ? "F" : "M", ci: c.ci };
 }
 
 export async function POST(req: Request) {
@@ -37,15 +49,13 @@ export async function POST(req: Request) {
   if (!user) return NextResponse.json({ result: "error" }, { status: 401 });
 
   const body = await req.json().catch(() => ({}));
-  let verified: Verified | null = null;
-
-  if (process.env.IDENTITY_MOCK === "1" && (body.mock === "adult" || body.mock === "minor")) {
-    const year = new Date().getFullYear() - (body.mock === "adult" ? 22 : 18);
-    verified = { birthDate: `${year}-01-01`, gender: "M", ci: `mock-${user.id}` };
-  } else if (typeof body.identityVerificationId === "string") {
-    verified = await fetchPortOne(body.identityVerificationId);
+  if (typeof body.identityVerificationId !== "string") {
+    return NextResponse.json({ result: "error" }, { status: 400 });
   }
-  if (!verified) return NextResponse.json({ result: "error" }, { status: 400 });
+  const verified = await fetchPortOne(body.identityVerificationId, user.id);
+  if (typeof verified === "string") {
+    return NextResponse.json({ result: verified }, { status: verified === "unavailable" ? 503 : 400 });
+  }
 
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!serviceKey) return NextResponse.json({ result: "error" }, { status: 500 });

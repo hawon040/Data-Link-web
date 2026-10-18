@@ -5,7 +5,7 @@ import PhoneView from "./view";
 export const dynamic = "force-dynamic";
 
 export default async function PhonePage() {
-  const { status } = await requireUser();
+  const { user, status } = await requireUser();
   if (status !== "need_identity") redirect(nextStepFor(status));
-  return <PhoneView />;
+  return <PhoneView userId={user.id} />;
 }

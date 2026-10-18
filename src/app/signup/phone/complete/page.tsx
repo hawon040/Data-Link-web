@@ -2,6 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
+import { IDENTITY_ERRORS } from "../view";
 
 // 모바일에서 포트원 인증 창이 페이지 이동 방식으로 끝났을 때 돌아오는 곳
 function Complete() {
@@ -21,10 +22,11 @@ function Complete() {
       body: JSON.stringify({ identityVerificationId: id }),
     })
       .then((r) => r.json())
+      .catch(() => ({ result: "error" }))
       .then(({ result }) => {
         if (result === "ok") router.replace("/signup/verified");
         else if (result === "underage") router.replace("/signup/age-limit");
-        else setMsg("인증을 확인하지 못했어요. 다시 시도해 주세요.");
+        else setMsg(IDENTITY_ERRORS[result] ?? "인증을 확인하지 못했어요. 다시 시도해 주세요.");
       });
   }, [params, router]);
 

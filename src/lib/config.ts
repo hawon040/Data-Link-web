@@ -42,6 +42,3 @@ export const GRADE_OPTIONS: { value: number | null; label: string }[] = [
 export function gradeLabel(v: number | null) {
   return v === null ? "학년 무관" : v === 4 ? "4학년 이상" : `${v}학년`;
 }
-
-// 개발·데모용: 본인인증 결과를 버튼으로 고르는 화면 (Figma 33)
-export const IDENTITY_MOCK = process.env.NEXT_PUBLIC_IDENTITY_MOCK === "1";
