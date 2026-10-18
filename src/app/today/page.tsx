@@ -6,7 +6,7 @@ import TodayView, { type TodayData } from "./today-view";
 export const dynamic = "force-dynamic";
 
 type Partner = {
-  nickname: string;
+  nickname: string | null;
   dept: string;
   grade: number;
   interests: string[];
@@ -42,7 +42,7 @@ export default async function TodayPage() {
       const mine = (me?.interests as string[] | undefined) ?? [];
       view = {
         id: match.id,
-        nickname: p.nickname,
+        nickname: p.nickname ?? "탈퇴한 학우",
         dept: p.dept,
         grade: p.grade,
         interests: p.interests,

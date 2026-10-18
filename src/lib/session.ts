@@ -8,6 +8,7 @@ export type Status =
   | "need_profile"
   | "need_kakao"
   | "suspended"
+  | "withdrawn"
   | "active";
 
 const NEXT_STEP: Record<Exclude<Status, "active">, string> = {
@@ -16,6 +17,7 @@ const NEXT_STEP: Record<Exclude<Status, "active">, string> = {
   need_profile: "/signup/profile",
   need_kakao: "/signup/kakao",
   suspended: "/me/privacy",
+  withdrawn: "/signup/withdrawn",
 };
 
 // 가입이 끝난 사용자만 통과. 아니면 다음 가입 단계로 보낸다.

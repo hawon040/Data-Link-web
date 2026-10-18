@@ -84,10 +84,7 @@ export default function TodayView({ data }: { data: TodayData }) {
           </section>
 
           <p className="mt-[26px] text-center text-[12px]">닉네임·학과·관심사만 공개됩니다.</p>
-          <Link href="/match/none" className="mt-[3px] block text-center text-[12px] font-medium whitespace-pre">
-            {"매칭이 안 됐을 때 보기  →"}
-          </Link>
-          <div className="mt-[9px] px-6">
+          <div className="mt-[24px] px-6">
             <BlockButton href={`/chat/${m.id}/topics`}>대화 시작하기</BlockButton>
           </div>
           <p className="mt-[11px] text-center text-[11px]">

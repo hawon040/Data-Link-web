@@ -42,3 +42,14 @@ export const GRADE_OPTIONS: { value: number | null; label: string }[] = [
 export function gradeLabel(v: number | null) {
   return v === null ? "학년 무관" : v === 4 ? "4학년 이상" : `${v}학년`;
 }
+
+// 보관 기간 (DB private.settings의 chat_retention_days·withdraw_grace_days·report_retention_days와 맞출 것)
+export const CHAT_RETENTION_DAYS = 30;
+export const WITHDRAW_GRACE_DAYS = 30;
+export const REPORT_RETENTION_DAYS = 365;
+
+// 문의 메일 (약관·처리방침·차단 해제 안내에 표시). 비워두면 "앱 내 공지"로 안내
+export const SUPPORT_EMAIL = process.env.NEXT_PUBLIC_SUPPORT_EMAIL ?? "";
+
+// 약관·개인정보처리방침 버전. 내용을 바꾸면 날짜를 올린다
+export const LEGAL_VERSION = "2026-10-18";

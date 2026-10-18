@@ -14,6 +14,10 @@ import ReviewView from "@/app/chat/[matchId]/review/view";
 import SafetyView from "@/app/chat/[matchId]/safety/view";
 import TopicsView from "@/app/chat/[matchId]/topics/view";
 import KakaoGuideView from "@/app/guide/kakao-search/view";
+import PrivacyPolicyView from "@/app/legal/privacy/view";
+import TermsView from "@/app/legal/terms/view";
+import WithdrawView from "@/app/me/withdraw/view";
+import WithdrawnView from "@/app/signup/withdrawn/view";
 import HomeView from "@/app/home/home-view";
 import AppliedView from "@/app/match/applied/view";
 import ConditionsView from "@/app/match/conditions/view";
@@ -39,7 +43,7 @@ import type { Prefs } from "@/lib/prefs";
 
 export const dynamic = "force-dynamic";
 
-// 개발용 디자인 확인: /preview/01 ~ /preview/46 (Figma 화면 번호)
+// 개발용 디자인 확인: /preview/01 ~ /preview/46 (Figma 화면 번호) + withdraw · withdrawn · terms · privacy
 // Supabase 없이 예시 데이터로 렌더. 배포 환경에서는 ENABLE_PREVIEW 없으면 404.
 const B = "/preview";
 const prefs: Prefs = { purpose: "friend", sameGenderOnly: false, includeSameDept: true, targetGrade: null };
@@ -98,6 +102,11 @@ function screen(n: string) {
     case "43": return <ConditionsView preview initial={{ ...prefs, includeSameDept: false }} applied={false} initialMode="dept" />;
     case "44": return <EditFieldView preview field="nickname" initial="민지" />;
     case "45": return <EditFieldView preview field="kakao" initial="mykakao24" />;
+    // Figma에 없는 추가 화면 (기존 화면 틀 재사용)
+    case "withdraw": return <WithdrawView preview />;
+    case "withdrawn": return <WithdrawnView preview />;
+    case "terms": return <TermsView backHref="/preview/02" />;
+    case "privacy": return <PrivacyPolicyView backHref="/preview/02" />;
     default: return null;
   }
 }

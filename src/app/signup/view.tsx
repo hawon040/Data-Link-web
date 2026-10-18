@@ -2,9 +2,10 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Card, Headline, Screen } from "@/components/screen";
+import Link from "next/link";
+import { Card, Headline, RadioDot, Screen } from "@/components/screen";
 import { BlockButton } from "@/components/ui";
-import { SCHOOL_EMAIL_DOMAIN, isSupabaseConfigured } from "@/lib/config";
+import { LEGAL_VERSION, SCHOOL_EMAIL_DOMAIN, isSupabaseConfigured } from "@/lib/config";
 import { createClient } from "@/lib/supabase/client";
 
 // Figma 02 · 본인 인증 (2:22) — 학교 이메일 입력 후 인증 코드 발송
@@ -13,12 +14,17 @@ export default function SignupStartView({ preview = false }: { preview?: boolean
   const [email, setEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [agreed, setAgreed] = useState(false);
 
   async function start() {
     setError(null);
     const value = email.trim().toLowerCase();
     if (!value.endsWith(`@${SCHOOL_EMAIL_DOMAIN}`)) {
       setError(`@${SCHOOL_EMAIL_DOMAIN} 학교 메일만 가입할 수 있어요.`);
+      return;
+    }
+    if (!agreed) {
+      setError("이용약관과 개인정보 수집·이용에 동의해 주세요.");
       return;
     }
     if (preview) return;
@@ -29,7 +35,8 @@ export default function SignupStartView({ preview = false }: { preview?: boolean
     setBusy(true);
     const { error } = await createClient().auth.signInWithOtp({
       email: value,
-      options: { shouldCreateUser: true },
+      // 동의 시각은 계정을 처음 만들 때 함께 저장되고, 본인인증 후 프로필로 옮겨진다
+      options: { shouldCreateUser: true, data: { terms_agreed_at: new Date().toISOString(), terms_version: LEGAL_VERSION } },
     });
     setBusy(false);
     if (error) return setError("인증 코드를 보내지 못했어요. 잠시 후 다시 시도해 주세요.");
@@ -93,6 +100,27 @@ export default function SignupStartView({ preview = false }: { preview?: boolean
             인증 정보는 필요한 범위에서만 처리해요.
           </p>
         </div>
+        <div className="flex items-center gap-3 rounded-[12px] border border-ink bg-card px-4 py-[13px]">
+          <button
+            type="button"
+            role="checkbox"
+            aria-checked={agreed}
+            onClick={() => setAgreed(!agreed)}
+            className="flex flex-1 items-center gap-3 text-left"
+          >
+            <RadioDot on={agreed} check />
+            <span className="text-[13px] font-bold">[필수] 이용약관·개인정보 수집에 동의해요</span>
+          </button>
+        </div>
+        <p className="-mt-[4px] text-center text-[11px] text-muted">
+          <Link href="/legal/terms?from=/signup" className="underline">
+            이용약관
+          </Link>
+          {"  ·  "}
+          <Link href="/legal/privacy?from=/signup" className="underline">
+            개인정보처리방침
+          </Link>
+        </p>
         {error && <p className="text-[12px] text-alert">{error}</p>}
       </div>
     </Screen>

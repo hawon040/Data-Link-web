@@ -22,11 +22,13 @@ npm run dev                  # http://localhost:3000
 ### Supabase 설정
 
 1. Supabase 프로젝트 생성
-2. SQL Editor에서 `supabase/migrations/20261015000000_init.sql` 실행 (또는 `supabase db push`)
+2. SQL Editor에서 `supabase/migrations/`의 SQL 파일을 날짜 순서대로 하나씩 실행 (또는 `supabase db push`)
 3. Database → Extensions에서 `pg_cron` 켜고 매일 매칭 등록
    ```sql
    select cron.schedule('daily-matching', '50 2 * * *', $$select public.run_daily_matching()$$);
    -- 02:50 UTC = 11:50 KST, 정오 발표
+   select cron.schedule('daily-cleanup', '0 19 * * *', $$select private.daily_cleanup()$$);
+   -- 19:00 UTC = 04:00 KST, 종료 30일 지난 대화·탈퇴 30일 지난 계정 삭제
    ```
 4. Authentication → SMTP 설정 (커스텀 SMTP가 있어야 템플릿 수정 가능)
 5. Authentication → Sign In / Providers → Email → Email OTP Length를 `6`으로

@@ -72,5 +72,15 @@ export async function POST(req: Request) {
     p_ci_hash: ciHash,
   });
   if (error) return NextResponse.json({ result: "error" }, { status: 500 });
+
+  // 가입 첫 화면(02)에서 받은 약관 동의 시각을 프로필에 기록
+  if (data === "ok") {
+    const agreedAt = user.user_metadata?.terms_agreed_at;
+    await admin
+      .from("profiles")
+      .update({ terms_agreed_at: typeof agreedAt === "string" ? agreedAt : new Date().toISOString() })
+      .eq("id", user.id)
+      .is("terms_agreed_at", null);
+  }
   return NextResponse.json({ result: data as string });
 }

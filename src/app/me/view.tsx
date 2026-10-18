@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import BottomNav from "@/components/bottom-nav";
 import { Toggle } from "@/components/screen";
@@ -20,14 +21,31 @@ export type MeData = {
 export default function MeView({ data, preview = false }: { data: MeData; preview?: boolean }) {
   const [autoJoin, setAutoJoin] = useState(data.autoJoin);
   const [sameGender, setSameGender] = useState(data.sameGenderOnly);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
-  async function update(patch: Record<string, boolean>) {
+  // 저장에 실패하면 토글을 원래대로 돌리고 알려준다
+  async function update(patch: Record<string, boolean>, revert: () => void) {
     if (preview) return;
+    setError(null);
     const supabase = createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();
-    if (user) await supabase.from("profiles").update(patch).eq("id", user.id);
+    const { error } = user
+      ? await supabase.from("profiles").update(patch).eq("id", user.id)
+      : { error: new Error("signed out") };
+    if (error) {
+      revert();
+      setError("설정을 저장하지 못했어요. 다시 시도해 주세요.");
+    }
+  }
+
+  async function logout() {
+    if (preview) return router.push("/preview/01");
+    await createClient().auth.signOut();
+    router.replace("/");
+    router.refresh();
   }
 
   return (
@@ -60,7 +78,7 @@ export default function MeView({ data, preview = false }: { data: MeData; previe
             label="매일 자동 참여"
             onChange={(v) => {
               setAutoJoin(v);
-              update({ auto_join: v });
+              update({ auto_join: v }, () => setAutoJoin(!v));
             }}
           />
         </div>
@@ -71,7 +89,7 @@ export default function MeView({ data, preview = false }: { data: MeData; previe
             label="같은 성별과만 매칭"
             onChange={(v) => {
               setSameGender(v);
-              update({ pref_same_gender_only: v });
+              update({ pref_same_gender_only: v }, () => setSameGender(!v));
             }}
           />
         </div>
@@ -88,13 +106,36 @@ export default function MeView({ data, preview = false }: { data: MeData; previe
         </p>
         <Link
           href={preview ? "/preview/29" : "/me/privacy"}
-          className="flex h-[59px] items-center text-[14px] font-medium whitespace-pre"
+          className="flex h-[59px] items-center border-b border-ink text-[14px] font-medium whitespace-pre"
         >
           {"신고 내역 · 개인정보 관리   →"}
         </Link>
+        <button
+          type="button"
+          onClick={logout}
+          className="flex h-[59px] w-full items-center border-b border-ink text-left text-[14px] font-medium"
+        >
+          로그아웃
+        </button>
+        <Link
+          href={preview ? "/preview/withdraw" : "/me/withdraw"}
+          className="flex h-[59px] items-center text-[14px] font-medium text-muted whitespace-pre"
+        >
+          {"회원 탈퇴   →"}
+        </Link>
       </div>
+      {error && <p className="mx-6 mt-3 text-[12px] text-alert">{error}</p>}
 
       <p className="mt-[21px] text-center text-[11px] text-muted">RANPICK은 실명·학번·연락처를 상대에게 공개하지 않아요.</p>
+      <p className="mt-[6px] text-center text-[11px] text-muted">
+        <Link href={`/legal/terms?from=${preview ? "/preview/08" : "/me"}`} className="underline">
+          이용약관
+        </Link>
+        {"  ·  "}
+        <Link href={`/legal/privacy?from=${preview ? "/preview/08" : "/me"}`} className="underline">
+          개인정보처리방침
+        </Link>
+      </p>
       <BottomNav />
     </div>
   );
