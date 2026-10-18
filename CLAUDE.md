@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-백석대 학우 1:1 랜덤매칭 모바일 웹. 기획은 `docs/PLANNING.md`, 결정 이유는 `docs/DECISIONS.md`.
+RANPICK — 백석대 학우 1:1 랜덤매칭 모바일 웹. 서비스 이름은 RANPICK ("교점"은 화면 문구에서 '오늘의 만남'이라는 뜻의 단어로만 쓴다). 기획은 `docs/PLANNING.md`, 결정 이유는 `docs/DECISIONS.md`.
 
 ## 지켜야 할 규칙
 

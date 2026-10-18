@@ -1,6 +1,6 @@
 {
-  "name": "백석 랜덤매칭",
-  "short_name": "랜덤매칭",
+  "name": "RANPICK",
+  "short_name": "RANPICK",
   "description": "매일 정오, 백석대 학우 한 명과 1:1로 연결돼요.",
   "start_url": "/",
   "display": "standalone",

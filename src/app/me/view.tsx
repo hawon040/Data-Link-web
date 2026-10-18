@@ -94,7 +94,7 @@ export default function MeView({ data, preview = false }: { data: MeData; previe
         </Link>
       </div>
 
-      <p className="mt-[21px] text-center text-[11px] text-muted">교점은 실명·학번·연락처를 상대에게 공개하지 않아요.</p>
+      <p className="mt-[21px] text-center text-[11px] text-muted">RANPICK은 실명·학번·연락처를 상대에게 공개하지 않아요.</p>
       <BottomNav />
     </div>
   );

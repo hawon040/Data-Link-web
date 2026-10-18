@@ -8,7 +8,7 @@ import "@fontsource/anton/400.css";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "RANPICK · 교점",
+  title: "RANPICK",
   description: "매일 정오, 백석대 학우 한 명과 1:1로 연결돼요.",
   manifest: "/manifest.webmanifest",
 };
