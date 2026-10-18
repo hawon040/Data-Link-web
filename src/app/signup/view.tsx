@@ -7,13 +7,11 @@ import { BlockButton } from "@/components/ui";
 import { SCHOOL_EMAIL_DOMAIN, isSupabaseConfigured } from "@/lib/config";
 import { createClient } from "@/lib/supabase/client";
 
-// Figma 02 · 본인 인증 (2:22) — 학교 이메일 입력 후 로그인 링크 발송
-export default function SignupStartView({ preview = false, linkError = false }: { preview?: boolean; linkError?: boolean }) {
+// Figma 02 · 본인 인증 (2:22) — 학교 이메일 입력 후 인증 코드 발송
+export default function SignupStartView({ preview = false }: { preview?: boolean }) {
   const router = useRouter();
   const [email, setEmail] = useState("");
-  const [error, setError] = useState<string | null>(
-    linkError ? "로그인 링크가 만료됐거나 이미 사용됐어요. 메일을 다시 받아 주세요." : null,
-  );
+  const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
   async function start() {
@@ -34,7 +32,7 @@ export default function SignupStartView({ preview = false, linkError = false }: 
       options: { shouldCreateUser: true },
     });
     setBusy(false);
-    if (error) return setError("로그인 메일을 보내지 못했어요. 잠시 후 다시 시도해 주세요.");
+    if (error) return setError("인증 코드를 보내지 못했어요. 잠시 후 다시 시도해 주세요.");
     router.push(`/signup/code?email=${encodeURIComponent(value)}`);
   }
 

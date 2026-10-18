@@ -1,7 +1,7 @@
 import { CircleArt, Headline, Screen } from "@/components/screen";
 import { BlockButton } from "@/components/ui";
 
-// Figma 42 · 로그인 메일 재발송 (29:3)
+// Figma 42 · 인증 코드 재발송 (29:3)
 export default function ResentView({ email }: { email: string }) {
   const q = email ? `?email=${encodeURIComponent(email)}` : "";
   return (
@@ -11,7 +11,7 @@ export default function ResentView({ email }: { email: string }) {
       backHref={`/signup/code${q}`}
       footer={
         <>
-          <BlockButton href={`/signup/code${q}`}>이전 화면으로</BlockButton>
+          <BlockButton href={`/signup/code${q}`}>코드 입력하기</BlockButton>
           <BlockButton tone="card" href="/signup">
             이메일 다시 입력
           </BlockButton>
@@ -23,11 +23,11 @@ export default function ResentView({ email }: { email: string }) {
       </CircleArt>
       <Headline
         center
-        title="메일을 다시 보냈어요"
+        title="코드를 다시 보냈어요"
         desc={
           <>
             학교 이메일 받은편지함과 스팸함을 확인해요.
-            <br />가장 최근에 받은 메일의 로그인을 눌러주세요.
+            <br />새 인증 코드는 3분 동안 유효합니다.
           </>
         }
       />

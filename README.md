@@ -28,13 +28,13 @@ npm run dev                  # http://localhost:3000
    select cron.schedule('daily-matching', '50 2 * * *', $$select public.run_daily_matching()$$);
    -- 02:50 UTC = 11:50 KST, 정오 발표
    ```
-4. Authentication → URL Configuration → Site URL을 앱 주소로 (`http://localhost:3000`, 배포 후엔 배포 주소)
-5. Authentication → SMTP 설정 (커스텀 SMTP가 있어야 템플릿 수정 가능)
-6. Authentication → Emails → Templates의 **Magic Link**와 **Confirm signup** 본문:
+4. Authentication → SMTP 설정 (커스텀 SMTP가 있어야 템플릿 수정 가능)
+5. Authentication → Sign In / Providers → Email → Email OTP Length를 `6`으로
+6. Authentication → Emails → Templates의 **Magic Link**와 **Confirm signup** 본문 (링크 없이 코드만):
    ```html
-   <h2>RANPICK 로그인</h2>
-   <p>아래 버튼을 누르면 로그인됩니다. 링크는 한 번만 쓸 수 있어요.</p>
-   <p><a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email">로그인</a></p>
+   <h2>RANPICK 인증 코드</h2>
+   <p>아래 6자리 코드를 입력해주세요.</p>
+   <h1>{{ .Token }}</h1>
    ```
 
 ## 디자인 (Figma)
