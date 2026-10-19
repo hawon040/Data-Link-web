@@ -15,7 +15,7 @@ RANPICK — 백석대 학우 1:1 랜덤매칭 모바일 웹. 서비스 이름은
 
 - `npm run dev` / `npm run build` / `npm run lint`
 - 스키마 변경은 `supabase/migrations/`에 새 파일로 추가 (기존 파일 수정 금지)
-- 새 RPC 함수는 기본으로 anon·authenticated 실행 권한이 없다 (20261019 마이그레이션). 필요한 역할에 `grant execute`를 명시한다
+- 새 RPC 함수는 기본으로 로그인 전(anon) 실행 권한이 없다 (20261019 마이그레이션). 로그인 전에도 필요하면 `grant execute ... to anon`을 명시하고, 서버 전용 함수는 authenticated에서도 revoke 한다
 
 ## 디자인
 
