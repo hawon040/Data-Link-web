@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Card, Headline, Screen } from "@/components/screen";
 import { BlockButton } from "@/components/ui";
-import { createClient } from "@/lib/supabase/client";
+import { chooseExchange } from "../exchange/exchange-view";
 
 // Figma 37 · 대화 한도 (13:152)
 export default function EndedView({
@@ -20,11 +20,15 @@ export default function EndedView({
 }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function skip() {
     if (preview) return router.push("/preview/26");
     setBusy(true);
-    await createClient().rpc("choose_exchange", { p_match_id: matchId, p_accept: false });
+    setError(null);
+    const err = await chooseExchange(matchId, false);
+    setBusy(false);
+    if (err) return setError(err);
     router.push(`${base}/exchange`);
   }
 
@@ -67,6 +71,7 @@ export default function EndedView({
       <div className="mt-[31px] flex h-[75px] items-center justify-center rounded-[12px] border-[1.4px] border-ink bg-mint text-[13px] font-bold">
         ID는 두 분 모두 동의할 때만 공개됩니다.
       </div>
+      {error && <p className="mt-3 text-center text-[12px] text-alert">{error}</p>}
     </Screen>
   );
 }

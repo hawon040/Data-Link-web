@@ -22,11 +22,16 @@ export default function BlockView({
 }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function block() {
     if (preview) return router.push("/preview/04");
     setBusy(true);
-    await createClient().from("blocks").upsert({ blocker_id: myId, blocked_id: partnerId });
+    const { error } = await createClient().from("blocks").upsert({ blocker_id: myId, blocked_id: partnerId });
+    if (error) {
+      setBusy(false);
+      return setError("차단하지 못했어요. 잠시 후 다시 시도해 주세요.");
+    }
     router.push("/home");
   }
 
@@ -64,6 +69,7 @@ export default function BlockView({
           </span>
         }
       />
+      {error && <p className="mt-3 text-center text-[12px] text-alert">{error}</p>}
     </Screen>
   );
 }

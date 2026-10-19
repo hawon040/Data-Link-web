@@ -2,11 +2,18 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { Headline, Screen, TiltCard } from "@/components/screen";
 import { BlockButton } from "@/components/ui";
 
-// Figma 25 · 교환 응답 대기 (12:114)
-export function WaitingView() {
+// Figma 25 · 교환 응답 대기 (12:114) — 상대가 고르면 화면이 바뀌도록 30초마다 다시 확인
+export function WaitingView({ preview = false }: { preview?: boolean }) {
+  const router = useRouter();
+  useEffect(() => {
+    if (preview) return;
+    const t = setInterval(() => router.refresh(), 30_000);
+    return () => clearInterval(t);
+  }, [preview, router]);
   return (
     <Screen
       title="교환 선택 완료"

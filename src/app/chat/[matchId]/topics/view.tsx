@@ -29,7 +29,9 @@ export default function TopicsView({
   async function send(q: string) {
     if (preview) return router.push(chatHref);
     setBusy(true);
-    await createClient().from("messages").insert({ match_id: matchId, sender_id: myId, body: q });
+    // 보내지 못해도(대화 종료·한도) 대화 화면에서 상태를 보여주므로 그대로 이동
+    const { error } = await createClient().from("messages").insert({ match_id: matchId, sender_id: myId, body: q });
+    if (error) console.warn("topic send failed", error.message);
     router.push(chatHref);
   }
 

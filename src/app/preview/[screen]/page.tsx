@@ -82,7 +82,7 @@ function screen(n: string) {
     case "22": return <ReportView preview base={B} matchId="preview" myId="me" partnerId="p" />;
     case "23": return <BlockView preview base={B} myId="me" partnerId="p" partnerName="하늘" />;
     case "24": return <ConfirmIdView preview matchId="preview" myKakaoId="mykakao24" />;
-    case "25": return <WaitingView />;
+    case "25": return <WaitingView preview />;
     case "26": return <ClosedView base={B} />;
     case "27": return <ProfileEditView preview initial={profile} />;
     case "28": return <BlocksView blockedAt={["2026-10-14T03:00:00Z"]} />;
