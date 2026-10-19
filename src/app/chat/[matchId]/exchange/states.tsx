@@ -97,11 +97,13 @@ export function MutualView({
   base,
   partnerName,
   contact,
+  partnerAvatar = null,
   preview = false,
 }: {
   base: string;
   partnerName: string;
   contact: string;
+  partnerAvatar?: string | null;
   preview?: boolean;
 }) {
   const router = useRouter();
@@ -129,8 +131,20 @@ export function MutualView({
         </>
       }
     >
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src="/figma/success-orbit.svg" width={160} height={160} alt="" className="mx-auto mt-[48px]" />
+      {/* 교환이 성사되면 상대가 올린 프로필 사진을 보여준다 (없으면 디자인 원) */}
+      {partnerAvatar ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={partnerAvatar}
+          width={160}
+          height={160}
+          alt={`${partnerName}님의 프로필 사진`}
+          className="mx-auto mt-[48px] size-[160px] rounded-full border-2 border-ink object-cover"
+        />
+      ) : (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src="/figma/success-orbit.svg" width={160} height={160} alt="" className="mx-auto mt-[48px]" />
+      )}
       <Headline
         center
         title={

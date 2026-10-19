@@ -3,13 +3,22 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import AvatarPicker from "@/components/avatar-picker";
 import ProfileForm, { type ProfileInput, validateProfile } from "@/components/profile-form";
 import { Headline, Screen } from "@/components/screen";
 import { BlockButton } from "@/components/ui";
 import { createClient } from "@/lib/supabase/client";
 
 // Figma 27 · 프로필 수정 (12:143)
-export default function ProfileEditView({ initial, preview = false }: { initial: ProfileInput; preview?: boolean }) {
+export default function ProfileEditView({
+  initial,
+  avatar = null,
+  preview = false,
+}: {
+  initial: ProfileInput;
+  avatar?: string | null;
+  preview?: boolean;
+}) {
   const router = useRouter();
   const [value, setValue] = useState<ProfileInput>(initial);
   const [busy, setBusy] = useState(false);
@@ -53,7 +62,15 @@ export default function ProfileEditView({ initial, preview = false }: { initial:
       }
     >
       <Headline size={24} title="내 소개를 바꿔볼까요?" />
-      <div className="mt-[31px]">
+      <div className="mt-[24px] flex items-center gap-[14px] rounded-[12px] border border-ink bg-card px-[15px] py-[12px]">
+        <AvatarPicker url={avatar} size={52} preview={preview} showRemove />
+        <p className="text-[12px] text-muted">
+          프로필 사진은 나와, 카카오톡 ID 교환에
+          <br />
+          둘 다 동의한 학우에게만 보여요.
+        </p>
+      </div>
+      <div className="mt-[20px]">
         <ProfileForm value={value} onChange={setValue} interestLabel="관심사" />
       </div>
       <Link href={preview ? "/preview/44" : "/me/edit/nickname"} className="mt-3 block text-[12px] text-muted">

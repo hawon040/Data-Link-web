@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import BottomNav from "@/components/bottom-nav";
+import AvatarPicker from "@/components/avatar-picker";
 import { Toggle } from "@/components/screen";
 import { BrandHeader } from "@/components/ui";
 import { createClient } from "@/lib/supabase/client";
@@ -17,6 +18,7 @@ export type MeData = {
   sameGenderOnly: boolean;
   verified: boolean;
   applied?: boolean; // 내일 매칭을 이미 신청했는지
+  avatarUrl?: string | null;
 };
 
 export default function MeView({ data, preview = false }: { data: MeData; preview?: boolean }) {
@@ -57,22 +59,21 @@ export default function MeView({ data, preview = false }: { data: MeData; previe
     <div className="min-h-dvh bg-paper pb-[100px]">
       <BrandHeader title="내 정보" badge="YOU" />
 
-      <Link
-        href={preview ? "/preview/27" : "/me/profile"}
-        className="mx-6 mt-[21px] block h-[150px] rounded-[8px] border border-ink bg-card px-[17px] pt-[18px] shadow-block"
-      >
+      {/* 원(사진)은 누르면 사진 고르기, 나머지는 프로필 수정으로 이동 */}
+      <div className="mx-6 mt-[21px] h-[150px] rounded-[8px] border border-ink bg-card px-[17px] pt-[18px] shadow-block">
         <div className="flex gap-[13px]">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/figma/profile-avatar.svg" width={62} height={62} alt="" />
-          <div className="pt-[2px]">
+          <AvatarPicker url={data.avatarUrl ?? null} preview={preview} />
+          <Link href={preview ? "/preview/27" : "/me/profile"} className="flex-1 pt-[2px]">
             <p className="text-[20px] font-bold">{data.nickname}님</p>
             <p className="mt-[5px] text-[12px] text-muted">
               백석대 · {data.dept} {data.grade}학년
             </p>
-          </div>
+          </Link>
         </div>
-        <p className="mt-[29px] text-[13px] font-bold whitespace-pre">{"프로필 수정  →"}</p>
-      </Link>
+        <Link href={preview ? "/preview/27" : "/me/profile"} className="mt-[29px] block text-[13px] font-bold whitespace-pre">
+          {"프로필 수정  →"}
+        </Link>
+      </div>
 
       <h2 className="font-display mt-[35px] px-6 text-[18px]">매칭 설정</h2>
       <div className="mx-6 mt-[8px] rounded-[12px] border border-ink bg-card px-[17px]">
