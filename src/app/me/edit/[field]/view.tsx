@@ -64,7 +64,8 @@ export default function EditFieldView({
       const {
         data: { user },
       } = await supabase.auth.getUser();
-      failed = Boolean((await supabase.from("profiles").update({ nickname: v }).eq("id", user!.id)).error);
+      const { data: rows, error } = await supabase.from("profiles").update({ nickname: v }).eq("id", user!.id).select("id");
+      failed = Boolean(error) || !rows?.length;
     }
     setBusy(false);
     if (failed) return setError("저장하지 못했어요.");

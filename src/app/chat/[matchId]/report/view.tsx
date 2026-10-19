@@ -4,15 +4,11 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Headline, RadioDot, Screen } from "@/components/screen";
 import { BlockButton } from "@/components/ui";
+import { REPORT_REASONS } from "@/lib/labels";
 import { createClient } from "@/lib/supabase/client";
 
 // Figma 22 · 신고 사유 (12:58) → 40 · 신고 사유 선택됨 (15:41)
-export const REASONS = [
-  { value: "harassment", label: "불쾌한 언행·성희롱" },
-  { value: "privacy", label: "개인정보 요구·유출" },
-  { value: "fake_contact", label: "등록된 카카오톡 ID가 본인 것이 아님" },
-  { value: "other", label: "기타" },
-] as const;
+const REASONS = REPORT_REASONS;
 type Reason = (typeof REASONS)[number]["value"];
 
 export default function ReportView({

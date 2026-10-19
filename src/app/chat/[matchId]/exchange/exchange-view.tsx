@@ -3,13 +3,11 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { BackHeader, BlockButton } from "@/components/ui";
+import { maskId } from "@/lib/labels";
 import { createClient } from "@/lib/supabase/client";
 
 // Figma 07 · 연락처 교환 (2:156)
-export function maskId(id: string) {
-  if (id.length <= 4) return `${id[0] ?? ""}***`;
-  return `${id.slice(0, 2)}****${id.slice(-2)}`;
-}
+export { maskId };
 
 export async function chooseExchange(matchId: string, accept: boolean) {
   const { error } = await createClient().rpc("choose_exchange", { p_match_id: matchId, p_accept: accept });

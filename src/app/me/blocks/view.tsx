@@ -27,7 +27,10 @@ export default function BlocksView({ blockedAt }: { blockedAt: string[] }) {
           </div>
         ))}
       </div>
-      <p className="mt-8 text-[13px] text-muted">차단 해제 방법은 고객지원에 문의해주세요.</p>
+      <p className="mt-8 text-[13px] text-muted">
+        차단 기록은 상대에게 알려지지 않아요.
+        <br />한 번 만난 학우와는 차단과 상관없이 다시 매칭되지 않아요.
+      </p>
     </Screen>
   );
 }

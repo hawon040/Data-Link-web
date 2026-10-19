@@ -16,6 +16,7 @@ import TopicsView from "@/app/chat/[matchId]/topics/view";
 import KakaoGuideView from "@/app/guide/kakao-search/view";
 import PrivacyPolicyView from "@/app/legal/privacy/view";
 import TermsView from "@/app/legal/terms/view";
+import ReportsView from "@/app/me/reports/view";
 import WithdrawView from "@/app/me/withdraw/view";
 import WithdrawnView from "@/app/signup/withdrawn/view";
 import HomeView from "@/app/home/home-view";
@@ -85,7 +86,7 @@ function screen(n: string) {
     case "26": return <ClosedView base={B} />;
     case "27": return <ProfileEditView preview initial={profile} />;
     case "28": return <BlocksView blockedAt={["2026-10-14T03:00:00Z"]} />;
-    case "29": return <PrivacyView kakaoHref="/preview/45" />;
+    case "29": return <PrivacyView kakaoHref="/preview/45" reportsHref="/preview/reports" data={{ kakaoId: "mykakao24", reportCount: 1, suspended: false }} />;
     case "30": return <ReviewDoneView />;
     case "31": return <ReportDoneView base={B} />;
     case "32": return <KakaoGuideView backHref="/preview/15" />;
@@ -105,6 +106,7 @@ function screen(n: string) {
     // Figma에 없는 추가 화면 (기존 화면 틀 재사용)
     case "withdraw": return <WithdrawView preview />;
     case "withdrawn": return <WithdrawnView preview />;
+    case "reports": return <ReportsView backHref="/preview/29" reports={[{ reported_at: "2026-10-14T03:00:00Z", reason: "harassment", detail: "대화 도중 불쾌한 메시지가 있었어요." }]} />;
     case "terms": return <TermsView backHref="/preview/02" />;
     case "privacy": return <PrivacyPolicyView backHref="/preview/02" />;
     default: return null;

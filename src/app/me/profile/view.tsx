@@ -24,7 +24,7 @@ export default function ProfileEditView({ initial, preview = false }: { initial:
     const {
       data: { user },
     } = await supabase.auth.getUser();
-    const { error } = await supabase
+    const { data: rows, error } = await supabase
       .from("profiles")
       .update({
         nickname: value.nickname.trim(),
@@ -33,9 +33,10 @@ export default function ProfileEditView({ initial, preview = false }: { initial:
         interests: value.interests,
         bio: value.bio.trim() || null,
       })
-      .eq("id", user!.id);
+      .eq("id", user!.id)
+      .select("id");
     setBusy(false);
-    if (error) return setError("저장하지 못했어요.");
+    if (error || !rows?.length) return setError("저장하지 못했어요. 다시 로그인한 뒤 시도해 주세요.");
     router.push("/me");
     router.refresh();
   }

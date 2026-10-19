@@ -16,6 +16,7 @@ export type MeData = {
   autoJoin: boolean;
   sameGenderOnly: boolean;
   verified: boolean;
+  applied?: boolean; // 내일 매칭을 이미 신청했는지
 };
 
 export default function MeView({ data, preview = false }: { data: MeData; preview?: boolean }) {
@@ -32,10 +33,14 @@ export default function MeView({ data, preview = false }: { data: MeData; previe
     const {
       data: { user },
     } = await supabase.auth.getUser();
-    const { error } = user
-      ? await supabase.from("profiles").update(patch).eq("id", user.id)
-      : { error: new Error("signed out") };
-    if (error) {
+    // .select()로 실제로 바뀐 행이 있는지까지 확인 (권한이 없으면 오류 없이 0행이 된다)
+    const { data: rows, error } = user
+      ? await supabase.from("profiles").update(patch).eq("id", user.id).select("id")
+      : { data: null, error: new Error("signed out") };
+    // 이미 내일 매칭을 신청했다면 바뀐 조건으로 다시 신청해 둔다
+    const reapply = !error && rows?.length && "pref_same_gender_only" in patch && data.applied;
+    const { error: applyError } = reapply ? await supabase.rpc("apply_match") : { error: null };
+    if (error || !rows?.length || applyError) {
       revert();
       setError("설정을 저장하지 못했어요. 다시 시도해 주세요.");
     }
