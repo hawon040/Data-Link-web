@@ -11,6 +11,8 @@ export const metadata: Metadata = {
   title: "RANPICK",
   description: "매일 정오, 백석대 학우 한 명과 1:1로 연결돼요.",
   manifest: "/manifest.webmanifest",
+  icons: { icon: "/icons/192.png", apple: "/icons/apple-180.png" },
+  appleWebApp: { capable: true, title: "RANPICK", statusBarStyle: "default" },
 };
 
 export const viewport: Viewport = {

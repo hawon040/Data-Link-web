@@ -39,6 +39,10 @@ npm run dev                  # http://localhost:3000
      select vault.create_secret('<.env의 PUSH_CRON_SECRET과 같은 값>', 'push_cron_secret');
      ```
      Vercel 환경변수에 `NEXT_PUBLIC_VAPID_PUBLIC_KEY`·`VAPID_PRIVATE_KEY`·`VAPID_SUBJECT`·`PUSH_CRON_SECRET` 등록
+   - **운영자 지정**: 운영자로 쓸 계정으로 가입을 마친 뒤 SQL Editor에서 한 번 실행 (모든 권한 부여). 그 뒤로는 `/admin/users`에서 다른 계정에 권한을 주고 뺀다
+     ```sql
+     select private.bootstrap_admin('운영자 로그인 이메일');
+     ```
 4. Authentication → SMTP 설정 (커스텀 SMTP가 있어야 템플릿 수정 가능)
 5. Authentication → Sign In / Providers → Email → Email OTP Length를 `6`으로
 6. Authentication → Emails → Templates의 **Magic Link**와 **Confirm signup** 본문 (링크 없이 코드만):
@@ -93,6 +97,9 @@ docs/                     기획·결정·법적 검토
 - [x] 프로필 작성 화면 (닉네임, 학과, 학년, 관심사, 소개)
 - [x] Figma 나머지 화면 반영 (46개 전부)
 - [x] Web Push 알림 (정오 매칭 발표 — DB pg_cron이 12:00에 `/api/push/noon` 호출) — VAPID 키·Vault 설정 후 실기기 테스트 필요
-- [x] 카카오톡 ID 암호화 (Supabase Vault 키 + pgcrypto, `20261019000000_encrypt_kakao_id.sql`)
+- [x] 카카오톡 ID 암호화 (Supabase Vault 키 + pgcrypto, `20261103001749_encrypt_kakao_id.sql`)
 - [x] 후기 화면, 신고 사유 선택 UI
+- [x] 운영자 화면 `/admin` — 일반 계정에 권한(신고 열람·정지·사진 삭제·공지·권한 관리)을 붙이는 방식, 처리 기록 `private.admin_log`
+- [x] 공지·문의 화면 `/notices` (`NEXT_PUBLIC_SUPPORT_EMAIL`, `NEXT_PUBLIC_KAKAO_CHANNEL_URL`)
+- [x] 홈 화면 아이콘 (`/icons/*` 코드로 생성한 임시 아이콘 — Figma 아이콘 나오면 교체)
 - [ ] 학교 메일 도메인 확인 (`NEXT_PUBLIC_SCHOOL_EMAIL_DOMAIN`)

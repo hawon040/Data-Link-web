@@ -50,6 +50,8 @@ export const REPORT_RETENTION_DAYS = 365;
 
 // 문의 메일 (약관·처리방침·차단 해제 안내에 표시). 비워두면 "앱 내 공지"로 안내
 export const SUPPORT_EMAIL = process.env.NEXT_PUBLIC_SUPPORT_EMAIL ?? "";
+// 카카오톡 채널 1:1 문의 주소 (https://pf.kakao.com/_xxxx/chat). 비워두면 공지 화면에서 숨긴다
+export const KAKAO_CHANNEL_URL = process.env.NEXT_PUBLIC_KAKAO_CHANNEL_URL ?? "";
 
 // 약관·개인정보처리방침 버전. 내용을 바꾸면 날짜를 올린다
 export const LEGAL_VERSION = "2026-10-18";

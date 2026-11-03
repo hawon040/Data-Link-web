@@ -2,7 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 // 로그인이 필요한 경로
-const PROTECTED = ["/home", "/today", "/chat", "/me", "/match", "/stats", "/signup/phone", "/signup/verified", "/signup/profile", "/signup/kakao"];
+const PROTECTED = ["/home", "/today", "/chat", "/me", "/match", "/stats", "/admin", "/signup/phone", "/signup/verified", "/signup/profile", "/signup/kakao"];
 
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({ request });
@@ -45,5 +45,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|manifest.webmanifest|sw.js).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|manifest.webmanifest|sw.js|icons/).*)"],
 };

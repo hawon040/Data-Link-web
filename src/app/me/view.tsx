@@ -21,6 +21,7 @@ export type MeData = {
   verified: boolean;
   applied?: boolean; // 내일 매칭을 이미 신청했는지
   avatarUrl?: string | null;
+  isAdmin?: boolean; // 운영자 권한이 하나라도 있으면 운영자 화면 링크를 보여준다
 };
 
 export default function MeView({ data, preview = false }: { data: MeData; preview?: boolean }) {
@@ -121,6 +122,17 @@ export default function MeView({ data, preview = false }: { data: MeData; previe
         >
           {"신고 내역 · 개인정보 관리   →"}
         </Link>
+        <Link
+          href={preview ? "/preview/08" : "/notices?from=/me"}
+          className="flex h-[59px] items-center border-b border-ink text-[14px] font-medium whitespace-pre"
+        >
+          {"공지 · 문의   →"}
+        </Link>
+        {data.isAdmin && !preview && (
+          <Link href="/admin" className="flex h-[59px] items-center border-b border-ink text-[14px] font-bold whitespace-pre">
+            {"운영자 화면   →"}
+          </Link>
+        )}
         <button
           type="button"
           onClick={logout}

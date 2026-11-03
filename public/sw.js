@@ -9,6 +9,7 @@ self.addEventListener("push", (event) => {
     self.registration.showNotification(data.title || "RANPICK", {
       body: data.body || "오늘의 학우를 확인해 보세요.",
       tag: data.tag || "ranpick",
+      icon: "/icons/192.png",
       data: { url: data.url || "/today" },
     }),
   );

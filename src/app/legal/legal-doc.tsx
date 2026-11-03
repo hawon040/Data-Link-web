@@ -30,7 +30,7 @@ export function LegalDoc({
         ))}
       </div>
       <p className="mt-[21px] text-center text-[11px] text-muted">
-        {SUPPORT_EMAIL ? `문의 ${SUPPORT_EMAIL}` : "문의처는 앱 공지사항에서 안내해요."}
+        {SUPPORT_EMAIL ? `문의 ${SUPPORT_EMAIL}` : "문의처는 공지사항(/notices)에서 안내해요."}
       </p>
     </Screen>
   );
