@@ -5,8 +5,10 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import BottomNav from "@/components/bottom-nav";
 import AvatarPicker from "@/components/avatar-picker";
+import PushToggle from "@/components/push-toggle";
 import { Toggle } from "@/components/screen";
 import { BrandHeader } from "@/components/ui";
+import { disablePush } from "@/lib/push";
 import { createClient } from "@/lib/supabase/client";
 
 // Figma 08 · 내 정보 (2:177)
@@ -50,6 +52,8 @@ export default function MeView({ data, preview = false }: { data: MeData; previe
 
   async function logout() {
     if (preview) return router.push("/preview/01");
+    // 이 기기로 다음 사용자에게 내 알림이 오지 않게 구독부터 해제
+    await disablePush().catch(() => {});
     await createClient().auth.signOut();
     router.replace("/");
     router.refresh();
@@ -99,6 +103,7 @@ export default function MeView({ data, preview = false }: { data: MeData; previe
             }}
           />
         </div>
+        <PushToggle preview={preview} />
         <Link href={preview ? "/preview/28" : "/me/blocks"} className="flex h-[68px] items-center text-[15px] font-medium">
           차단한 학우 관리
         </Link>

@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
-import { kstDate, kstDateLabelKo } from "@/lib/date";
+import { MATCH_ANNOUNCE_HOUR_KST } from "@/lib/config";
+import { kstDate, kstDateLabelKo, kstTodayAt } from "@/lib/date";
 import { requireActive } from "@/lib/session";
 import TodayView, { type TodayData } from "./today-view";
 
@@ -14,6 +15,21 @@ type Partner = {
 
 export default async function TodayPage() {
   const { supabase, user } = await requireActive();
+
+  // 정오 전: 매칭 결과는 DB가 아직 보여주지 않는다. 신청한 사람에게는 카운트다운
+  const serverNow = Date.now();
+  const announceAt = kstTodayAt(MATCH_ANNOUNCE_HOUR_KST);
+  if (serverNow < announceAt) {
+    const { data: pool } = await supabase
+      .from("match_pool")
+      .select("user_id")
+      .eq("user_id", user.id)
+      .eq("match_date", kstDate())
+      .maybeSingle();
+    if (pool) {
+      return <TodayView data={{ dateLabel: kstDateLabelKo(), match: null, waiting: { serverNow, announceAt } }} />;
+    }
+  }
 
   const [{ data: match }, { data: me }] = await Promise.all([
     supabase

@@ -76,7 +76,7 @@ function screen(n: string) {
     case "15": return <KakaoSetupView preview />;
     case "16": return <ConditionsView preview initial={prefs} applied={false} />;
     case "17": return <PurposeView preview initial="friend" />;
-    case "18": return <AppliedView summary="친구 · 성별 무관 · 학과 포함" />;
+    case "18": return <AppliedView preview summary="친구 · 성별 무관 · 학과 포함" />;
     case "19": return <TopicsView preview matchId="preview" myId="me" />;
     case "21": return <SafetyView base={B} />;
     case "22": return <ReportView preview base={B} matchId="preview" myId="me" partnerId="p" />;

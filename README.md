@@ -27,9 +27,18 @@ npm run dev                  # http://localhost:3000
    ```sql
    select cron.schedule('daily-matching', '50 2 * * *', $$select public.run_daily_matching()$$);
    -- 02:50 UTC = 11:50 KST, 정오 발표
+   select cron.schedule('noon-push', '0 3 * * *', $$select private.trigger_noon_push()$$);
+   -- 03:00 UTC = 12:00 KST, 매칭 발표 알림 (아래 '정오 알림' 설정 필요)
    select cron.schedule('daily-cleanup', '0 19 * * *', $$select private.daily_cleanup()$$);
    -- 19:00 UTC = 04:00 KST, 종료 30일 지난 대화·탈퇴 30일 지난 계정 삭제
    ```
+   - 카카오톡 ID 암호화 키는 마이그레이션이 Vault에 `kakao_id_key`로 만든다. **지우거나 바꾸면 저장된 ID를 모두 못 읽는다** (Integrations → Vault에서 확인만)
+   - **정오 알림**: Database → Extensions에서 `pg_net`도 켜고, SQL Editor에서 Vault에 두 값을 넣는다
+     ```sql
+     select vault.create_secret('https://<배포 주소>', 'app_url');
+     select vault.create_secret('<.env의 PUSH_CRON_SECRET과 같은 값>', 'push_cron_secret');
+     ```
+     Vercel 환경변수에 `NEXT_PUBLIC_VAPID_PUBLIC_KEY`·`VAPID_PRIVATE_KEY`·`VAPID_SUBJECT`·`PUSH_CRON_SECRET` 등록
 4. Authentication → SMTP 설정 (커스텀 SMTP가 있어야 템플릿 수정 가능)
 5. Authentication → Sign In / Providers → Email → Email OTP Length를 `6`으로
 6. Authentication → Emails → Templates의 **Magic Link**와 **Confirm signup** 본문 (링크 없이 코드만):
@@ -75,13 +84,15 @@ docs/                     기획·결정·법적 검토
 | 둘 다 동의해야 카톡 ID 공개 | `choose_exchange()`, `get_partner_contact()` |
 | 성별·상태·인증 정보는 사용자가 못 바꿈 | 컬럼 권한 + RLS |
 | 신고 3명 누적 시 자동 정지 | `private.auto_suspend()` |
+| 매칭 결과는 정오(발표 시각) 전에는 당사자에게도 안 보임 | `match_announced()` + RLS |
+| 카카오톡 ID는 암호문으로만 저장 (키는 Vault `kakao_id_key`) | `private.encrypt_kakao()` / `decrypt_kakao()` |
 
 ## 남은 작업
 
 - [x] 포트원 통합 본인인증 연동 (`/api/identity` + 서버에서 profiles 생성) — 키 발급 후 실제 인증 테스트 필요
-- [ ] 프로필 작성 화면 (닉네임, 학과, 학년, 관심사, 소개)
-- [ ] Figma 나머지 화면 반영 (02·03 인증, 08 내 정보, 09~46 상태 화면)
-- [ ] Web Push 알림 (정오 매칭 발표)
-- [ ] 카카오톡 ID 암호화 (Supabase Vault)
-- [ ] 후기 화면, 신고 사유 선택 UI
+- [x] 프로필 작성 화면 (닉네임, 학과, 학년, 관심사, 소개)
+- [x] Figma 나머지 화면 반영 (46개 전부)
+- [x] Web Push 알림 (정오 매칭 발표 — DB pg_cron이 12:00에 `/api/push/noon` 호출) — VAPID 키·Vault 설정 후 실기기 테스트 필요
+- [x] 카카오톡 ID 암호화 (Supabase Vault 키 + pgcrypto, `20261019000000_encrypt_kakao_id.sql`)
+- [x] 후기 화면, 신고 사유 선택 UI
 - [ ] 학교 메일 도메인 확인 (`NEXT_PUBLIC_SCHOOL_EMAIL_DOMAIN`)

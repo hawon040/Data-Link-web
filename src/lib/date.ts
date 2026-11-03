@@ -26,3 +26,9 @@ export function kstDateLabelKo(): string {
   const day = ["일", "월", "화", "수", "목", "금", "토"][d.getUTCDay()];
   return `${d.getUTCMonth() + 1}월 ${d.getUTCDate()}일 ${day}요일`;
 }
+
+// 오늘(KST) 지정 시각의 epoch ms — 매칭 발표 시각 계산용
+export function kstTodayAt(hour: number): number {
+  const d = kstNow();
+  return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), hour) - 9 * 60 * 60 * 1000;
+}

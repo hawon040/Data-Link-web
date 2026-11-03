@@ -6,6 +6,7 @@ import { CircleArt, Headline, Screen } from "@/components/screen";
 import { BlockButton } from "@/components/ui";
 import { WITHDRAW_GRACE_DAYS } from "@/lib/config";
 import { AVATAR_BUCKET, avatarPath } from "@/lib/avatar";
+import { disablePush } from "@/lib/push";
 import { createClient } from "@/lib/supabase/client";
 
 // 회원 탈퇴 확인 — 23번(학우 차단) 화면 틀을 따른다
@@ -24,6 +25,7 @@ export default function WithdrawView({ preview = false }: { preview?: boolean })
     } = await supabase.auth.getUser();
     // 프로필 사진 파일은 탈퇴 전에 지운다 (실패해도 탈퇴는 진행, DB가 표시를 끊는다)
     if (user) await supabase.storage.from(AVATAR_BUCKET).remove([avatarPath(user.id)]);
+    await disablePush().catch(() => {});
     const { error } = await supabase.rpc("withdraw_account");
     if (error) {
       setBusy(false);

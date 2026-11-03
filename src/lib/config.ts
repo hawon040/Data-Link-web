@@ -1,7 +1,7 @@
 // 서비스 규칙 (DB의 private.settings와 값을 맞춰 둘 것)
 export const MESSAGE_LIMIT_PER_USER = 20;
 export const CHAT_HOURS = 24;
-export const MATCH_ANNOUNCE_HOUR_KST = 12;
+export const MATCH_ANNOUNCE_HOUR_KST = 12; // DB private.settings.announce_hour_kst, pg_cron noon-push 시각과 맞출 것
 
 // TODO: 백석대 학생 메일 도메인 확인 후 수정
 export const SCHOOL_EMAIL_DOMAIN =

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import BottomNav from "@/components/bottom-nav";
+import NoonCountdown from "@/components/noon-countdown";
 import { BlockButton, BrandHeader, Chip, Stamp } from "@/components/ui";
 
 // Figma 05 · 오늘의 학우 (2:98)
@@ -13,10 +14,13 @@ export type TodayData = {
     commonInterests: string[];
     interests: string[];
   };
+  // 신청했고 아직 정오 전 (발표 대기)
+  waiting?: { serverNow: number; announceAt: number };
 };
 
 export default function TodayView({ data }: { data: TodayData }) {
   const m = data.match;
+  if (data.waiting) return <WaitingView dateLabel={data.dateLabel} {...data.waiting} />;
   // 공통 관심사를 먼저, 없으면 상대 관심사를 보여준다 (최대 2개)
   const chips = m ? (m.commonInterests.length ? m.commonInterests : m.interests).slice(0, 2) : [];
 
@@ -106,6 +110,28 @@ export default function TodayView({ data }: { data: TodayData }) {
         </section>
       )}
 
+      <BottomNav />
+    </div>
+  );
+}
+
+function WaitingView({ dateLabel, serverNow, announceAt }: { dateLabel: string; serverNow: number; announceAt: number }) {
+  return (
+    <div className="min-h-dvh bg-lime pb-[100px]">
+      <BrandHeader title="오늘의 학우" badge="1:1" />
+      <section className="px-6 pt-[18px]">
+        <p className="font-label text-[13px]">{dateLabel} · 오늘의 교점</p>
+        <h2 className="font-display mt-1 text-[27px] leading-[1.45]">
+          정오에 오늘의 학우를
+          <br />
+          알려드려요
+        </h2>
+      </section>
+      <section className="mx-6 mt-[15px] rounded-[8px] border-[1.5px] border-ink bg-card p-6 text-center shadow-block">
+        <p className="text-[13px] font-medium text-muted">발표까지</p>
+        <NoonCountdown serverNow={serverNow} announceAt={announceAt} />
+        <p className="mt-2 text-[13px]">이 화면을 열어 두면 12시에 바로 보여드려요.</p>
+      </section>
       <BottomNav />
     </div>
   );
