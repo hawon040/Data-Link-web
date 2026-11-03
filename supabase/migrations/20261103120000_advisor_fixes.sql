@@ -10,3 +10,8 @@ grant execute on function public.match_announced(date) to authenticated;
 
 drop extension if exists pg_net;
 create extension pg_net with schema extensions;
+
+-- 3. 외래키 인덱스 (운영자 기록·공지 작성자, 계정 삭제 시 on delete set null 속도)
+create index if not exists admin_grants_granted_by_idx on private.admin_grants (granted_by);
+create index if not exists admin_log_actor_idx on private.admin_log (actor_id);
+create index if not exists notices_created_by_idx on public.notices (created_by);
