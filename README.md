@@ -38,6 +38,7 @@ npm run dev                  # http://localhost:3000
    <p>아래 6자리 코드를 입력해주세요.</p>
    <h1>{{ .Token }}</h1>
    ```
+7. 정오 알림: Vercel 환경변수에 `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`, `CRON_SECRET` 등록 (`.env.example` 참고). `vercel.json`의 크론이 매일 03:00 UTC(12:00 KST)에 `/api/push/daily`를 호출한다
 
 ## 디자인 (Figma)
 
@@ -81,7 +82,7 @@ docs/                     기획·결정·법적 검토
 - [x] 포트원 통합 본인인증 연동 (`/api/identity` + 서버에서 profiles 생성) — 키 발급 후 실제 인증 테스트 필요
 - [ ] 프로필 작성 화면 (닉네임, 학과, 학년, 관심사, 소개)
 - [ ] Figma 나머지 화면 반영 (02·03 인증, 08 내 정보, 09~46 상태 화면)
-- [ ] Web Push 알림 (정오 매칭 발표)
-- [ ] 카카오톡 ID 암호화 (Supabase Vault)
+- [x] Web Push 알림 (정오 매칭 발표) — `public/sw.js`, `/api/push/daily`
+- [x] 카카오톡 ID 암호화 (Supabase Vault 키 + pgcrypto)
 - [ ] 후기 화면, 신고 사유 선택 UI
-- [ ] 학교 메일 도메인 확인 (`NEXT_PUBLIC_SCHOOL_EMAIL_DOMAIN`)
+- [x] 학교 메일 도메인 확인 — `bu.ac.kr`로 실제 가입·인증 확인 (2026-11-03)

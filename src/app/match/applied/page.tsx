@@ -22,5 +22,5 @@ export default async function AppliedPage() {
       ].join(" · ")
     : "아직 신청하지 않았어요";
 
-  return <AppliedView summary={summary} />;
+  return <AppliedView summary={summary} userId={user.id} />;
 }

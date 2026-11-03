@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { Headline, Screen, TiltCard } from "@/components/screen";
+import { PushOptIn } from "@/components/push-opt-in";
 import { BlockButton } from "@/components/ui";
 
 // Figma 18 · 신청 완료 (11:106)
-export default function AppliedView({ summary }: { summary: string }) {
+export default function AppliedView({ summary, userId }: { summary: string; userId?: string }) {
   return (
     <Screen title="내일 매칭 신청" badge="1:1" backHref="/home" bg="lime" footer={<BlockButton href="/home">홈으로</BlockButton>}>
       <div className="mt-[83px]">
@@ -26,6 +27,7 @@ export default function AppliedView({ summary }: { summary: string }) {
           </span>
         }
       />
+      {userId && <PushOptIn userId={userId} />}
       <Link href="/match/conditions" className="mt-[42px] block h-[88px] rounded-[12px] border border-ink bg-card px-[17px] pt-[18px]">
         <p className="text-[14px] font-medium">{summary}</p>
         <p className="mt-[19px] text-[10px] font-bold whitespace-pre">{"조건 수정  →"}</p>
