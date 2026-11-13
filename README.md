@@ -44,6 +44,7 @@ npm run dev                  # http://localhost:3000
 
 - 프로젝트: Vercel `big-ding` 팀의 `data-link-web` → https://data-link-web-eta.vercel.app
 - `main`에 푸시하면 Production으로 자동 배포된다
+- Hobby 플랜은 커밋 작성자가 Vercel 팀 멤버(hawon040)여야 배포된다. 다른 이름으로 작성된 커밋은 배포가 막힌다
 - Supabase 키(`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`)는 Vercel의 Supabase 통합이 넣어 준다. 같은 이름으로 직접 추가하지 말 것
 - 직접 넣는 값: `NEXT_PUBLIC_SCHOOL_EMAIL_DOMAIN`, 정오 알림 키 4개, 포트원 키 3개
 - 포트원 계약 전 테스트용 `IDENTITY_MOCK=1`, `NEXT_PUBLIC_IDENTITY_MOCK=1`은 학생 공개 전에 반드시 삭제
