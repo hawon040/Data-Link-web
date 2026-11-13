@@ -40,6 +40,14 @@ npm run dev                  # http://localhost:3000
    ```
 7. 정오 알림: Vercel 환경변수에 `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`, `CRON_SECRET` 등록 (`.env.example` 참고). `vercel.json`의 크론이 매일 03:00 UTC(12:00 KST)에 `/api/push/daily`를 호출한다
 
+### Vercel 배포
+
+- 프로젝트: Vercel `big-ding` 팀의 `data-link-web` → https://data-link-web-eta.vercel.app
+- `main`에 푸시하면 Production으로 자동 배포된다
+- Supabase 키(`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`)는 Vercel의 Supabase 통합이 넣어 준다. 같은 이름으로 직접 추가하지 말 것
+- 직접 넣는 값: `NEXT_PUBLIC_SCHOOL_EMAIL_DOMAIN`, 정오 알림 키 4개, 포트원 키 3개
+- 포트원 계약 전 테스트용 `IDENTITY_MOCK=1`, `NEXT_PUBLIC_IDENTITY_MOCK=1`은 학생 공개 전에 반드시 삭제
+
 ## 디자인 (Figma)
 
 - 원본: [교점 | 백석대 1:1 학우 매칭 모바일 웹](https://www.figma.com/design/j0zSbAXrx4epF4rogj18da)
