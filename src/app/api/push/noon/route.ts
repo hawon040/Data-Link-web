@@ -35,7 +35,14 @@ export async function POST(req: Request) {
   if (!publicKey || !privateKey || !subject || !serviceKey) {
     return NextResponse.json({ error: "not configured" }, { status: 503 });
   }
-  webpush.setVapidDetails(subject, publicKey, privateKey);
+  // 키 형식이 틀리면 web-push가 예외를 던진다 → 어느 값이 틀렸는지만 알려준다 (값은 응답에 넣지 않음)
+  try {
+    webpush.setVapidDetails(subject, publicKey, privateKey);
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "";
+    const field = /subject/i.test(msg) ? "VAPID_SUBJECT" : /public/i.test(msg) ? "NEXT_PUBLIC_VAPID_PUBLIC_KEY" : "VAPID_PRIVATE_KEY";
+    return NextResponse.json({ error: "invalid vapid config", field }, { status: 503 });
+  }
 
   const admin = createAdmin(process.env.NEXT_PUBLIC_SUPABASE_URL!, serviceKey, {
     auth: { persistSession: false },
