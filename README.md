@@ -57,6 +57,7 @@ npm run dev                  # http://localhost:3000
 - 프로젝트: Vercel `big-ding` 팀의 `data-link-web` → https://data-link-web-eta.vercel.app
 - `main`에 푸시하면 Production으로 자동 배포된다
 - Hobby 플랜은 커밋 작성자가 Vercel 팀 멤버(hawon040)여야 배포된다. 다른 이름으로 작성된 커밋은 배포가 막힌다
+- 환경변수를 바꾼 뒤에는 다시 배포해야 적용된다. 대시보드의 Redeploy가 추가 인증을 요구하면 `main`에 커밋을 푸시해도 된다
 - Supabase 키(`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`)는 Vercel의 Supabase 통합이 넣어 준다. 같은 이름으로 직접 추가하지 말 것
 - 직접 넣는 값: `NEXT_PUBLIC_SCHOOL_EMAIL_DOMAIN`, 정오 알림 키 4개(`NEXT_PUBLIC_VAPID_PUBLIC_KEY`·`VAPID_PRIVATE_KEY`·`VAPID_SUBJECT`·`PUSH_CRON_SECRET`), 포트원 키 3개
 - 휴대폰 본인인증은 포트원 실제 연동만 있다 (가짜 인증 모드 없음). 포트원 키 없이는 신규 가입이 본인인증 단계에서 멈춘다
