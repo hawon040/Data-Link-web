@@ -20,16 +20,18 @@ export default function ReviewView({
   matchId,
   myId,
   partnerName,
+  initialRating = null,
   preview = false,
 }: {
   base: string;
   matchId: string;
   myId: string;
   partnerName: string;
+  initialRating?: "good" | "meh" | null;
   preview?: boolean;
 }) {
   const router = useRouter();
-  const [choice, setChoice] = useState<Choice | null>(null);
+  const [choice, setChoice] = useState<Choice | null>(initialRating);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -40,10 +42,10 @@ export default function ReviewView({
     setBusy(true);
     const { error } = await createClient()
       .from("reviews")
-      .insert({ match_id: matchId, user_id: myId, rating: choice });
+      .upsert({ match_id: matchId, user_id: myId, rating: choice }, { onConflict: "match_id,user_id" });
     setBusy(false);
-    // 23505: 이미 후기를 남긴 경우 — 완료로 처리
-    if (error && error.code !== "23505") return setError("후기를 저장하지 못했어요.");
+    // 이미 남긴 후기는 새 선택으로 바뀐다
+    if (error) return setError("후기를 저장하지 못했어요.");
     router.push(`${base}/review/done`);
   }
 

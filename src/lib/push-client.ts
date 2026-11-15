@@ -59,3 +59,15 @@ export async function enablePush(userId: string): Promise<PushState> {
   }
   return "on";
 }
+
+// 알림 끄기: 이 기기의 구독을 해지하고 DB에서도 지운다
+export async function disablePush(): Promise<PushState> {
+  if (!supported()) return "unsupported";
+  const reg = await navigator.serviceWorker.getRegistration("/sw.js");
+  const sub = await reg?.pushManager.getSubscription();
+  if (!sub) return "off";
+  const { error } = await createClient().from("push_subscriptions").delete().eq("endpoint", sub.endpoint);
+  if (error) return "on";
+  await sub.unsubscribe();
+  return "off";
+}

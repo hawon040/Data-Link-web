@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import BottomNav from "@/components/bottom-nav";
 import AvatarPicker from "@/components/avatar-picker";
+import { PushSetting } from "@/components/push-setting";
 import { Toggle } from "@/components/screen";
 import { BrandHeader } from "@/components/ui";
 import { createClient } from "@/lib/supabase/client";
@@ -99,6 +100,7 @@ export default function MeView({ data, preview = false }: { data: MeData; previe
             }}
           />
         </div>
+        <PushSetting preview={preview} />
         <Link href={preview ? "/preview/28" : "/me/blocks"} className="flex h-[68px] items-center text-[15px] font-medium">
           차단한 학우 관리
         </Link>

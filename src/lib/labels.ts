@@ -5,6 +5,7 @@ export const REPORT_REASONS = [
   { value: "harassment", label: "불쾌한 언행·성희롱" },
   { value: "privacy", label: "개인정보 요구·유출" },
   { value: "fake_contact", label: "등록된 카카오톡 ID가 본인 것이 아님" },
+  { value: "photo", label: "부적절한 프로필 사진" },
   { value: "other", label: "기타" },
 ] as const;
 
