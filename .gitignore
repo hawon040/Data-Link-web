@@ -40,3 +40,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Supabase CLI 로컬 상태 (프로젝트 ref·DB 연결 주소)
+supabase/.temp/

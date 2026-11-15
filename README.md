@@ -52,6 +52,15 @@ npm run dev                  # http://localhost:3000
    <h1>{{ .Token }}</h1>
    ```
 
+### Vercel 배포
+
+- 프로젝트: Vercel `big-ding` 팀의 `data-link-web` → https://data-link-web-eta.vercel.app
+- `main`에 푸시하면 Production으로 자동 배포된다
+- Hobby 플랜은 커밋 작성자가 Vercel 팀 멤버(hawon040)여야 배포된다. 다른 이름으로 작성된 커밋은 배포가 막힌다
+- Supabase 키(`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`)는 Vercel의 Supabase 통합이 넣어 준다. 같은 이름으로 직접 추가하지 말 것
+- 직접 넣는 값: `NEXT_PUBLIC_SCHOOL_EMAIL_DOMAIN`, 정오 알림 키 4개(`NEXT_PUBLIC_VAPID_PUBLIC_KEY`·`VAPID_PRIVATE_KEY`·`VAPID_SUBJECT`·`PUSH_CRON_SECRET`), 포트원 키 3개
+- 휴대폰 본인인증은 포트원 실제 연동만 있다 (가짜 인증 모드 없음). 포트원 키 없이는 신규 가입이 본인인증 단계에서 멈춘다
+
 ## 디자인 (Figma)
 
 - 원본: [교점 | 백석대 1:1 학우 매칭 모바일 웹](https://www.figma.com/design/j0zSbAXrx4epF4rogj18da)
@@ -102,4 +111,5 @@ docs/                     기획·결정·법적 검토
 - [x] 운영자 화면 `/admin` — 일반 계정에 권한(신고 열람·정지·사진 삭제·공지·권한 관리)을 붙이는 방식, 처리 기록 `private.admin_log`
 - [x] 공지·문의 화면 `/notices` (`NEXT_PUBLIC_SUPPORT_EMAIL`, `NEXT_PUBLIC_KAKAO_CHANNEL_URL`)
 - [x] 홈 화면 아이콘 (`/icons/*` 코드로 생성한 임시 아이콘 — Figma 아이콘 나오면 교체)
-- [ ] 학교 메일 도메인 확인 (`NEXT_PUBLIC_SCHOOL_EMAIL_DOMAIN`)
+- [x] 학교 메일 도메인 확인 — `bu.ac.kr`로 실제 가입·인증 확인 (2026-11-03)
+- [x] 후기 다시 고르기, '카카오톡 ID가 본인 것이 아님' 신고 7일 기한 (`20261115000000_review_edit_report_rules.sql`)
