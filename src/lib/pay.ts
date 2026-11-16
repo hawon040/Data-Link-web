@@ -10,8 +10,29 @@ export const PAY_ERRORS: Record<string, string> = {
   unavailable: "결제 서비스를 준비 중이에요. 잠시 후 다시 시도해 주세요.",
   already_paid: "이미 가입비를 결제했어요. 이번 결제는 자동으로 환불돼요.",
   not_active: "가입을 마친 뒤에 구매할 수 있어요. 이번 결제는 자동으로 환불돼요.",
-  invalid: "결제를 확인하지 못했어요. 결제됐다면 자동으로 환불돼요.",
+  invalid: "결제 정보가 이 계정과 맞지 않아요. 운영자에게 문의해 주세요.",
+  portone_auth: "결제 확인 서버 설정 오류예요(포트원 키). 결제는 됐을 수 있으니 '결제 다시 확인'을 눌러 주세요.",
+  not_found: "결제 기록을 찾지 못했어요. 잠시 뒤 '결제 다시 확인'을 눌러 주세요.",
+  not_paid: "아직 결제가 완료되지 않았어요. 잠시 뒤 '결제 다시 확인'을 눌러 주세요.",
+  portone_error: "결제 확인 중 오류가 났어요. 잠시 뒤 '결제 다시 확인'을 눌러 주세요.",
+  error: "결제 확인 중 오류가 났어요. 잠시 뒤 '결제 다시 확인'을 눌러 주세요.",
 };
+
+// 확인을 못 한 결제 (다시 결제하지 않고 재확인할 수 있게 이 브라우저에 잠시 보관)
+const PENDING = "ranpick_pending_payment";
+export function pendingPayment() {
+  try {
+    return sessionStorage.getItem(PENDING);
+  } catch {
+    return null;
+  }
+}
+function setPending(id: string | null) {
+  try {
+    if (id) sessionStorage.setItem(PENDING, id);
+    else sessionStorage.removeItem(PENDING);
+  } catch {}
+}
 
 // 결제 완료를 서버에 알리고 결과 코드를 돌려준다
 export async function confirmPayment(paymentId: string): Promise<string> {
@@ -19,9 +40,18 @@ export async function confirmPayment(paymentId: string): Promise<string> {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify({ paymentId }),
-  });
-  const { result } = await r.json().catch(() => ({ result: "error" }));
+  }).catch(() => null);
+  const { result } = r ? await r.json().catch(() => ({ result: "error" })) : { result: "error" };
+  // 확정됐거나 다시 확인해도 소용없는 결과면 보관한 결제를 지운다
+  const retryable = ["portone_auth", "not_found", "not_paid", "portone_error", "error", "unavailable"];
+  setPending(retryable.includes(result) ? paymentId : null);
   return result as string;
+}
+
+// '결제 다시 확인' 버튼
+export async function retryPendingPayment(): Promise<string | null> {
+  const id = pendingPayment();
+  return id ? confirmPayment(id) : null;
 }
 
 export type PayCustomer = { email?: string; phone: string; name?: string };

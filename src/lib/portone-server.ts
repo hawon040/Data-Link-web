@@ -13,14 +13,20 @@ function headers() {
 
 export type PaidPayment = { id: string; amount: number; customData: Record<string, unknown> };
 
-// 결제 완료 건만 돌려준다. 미설정·미결제·원화가 아니면 null
-export async function getPaidPayment(paymentId: string): Promise<PaidPayment | null | "unavailable"> {
+// 결제 완료 건만 돌려준다. 아니면 실패 이유 코드
+//   unavailable: 키 미설정 · portone_auth: API Secret이 틀리거나 다른 상점 것 · not_found: 결제 건 없음
+//   not_paid: 결제 완료 상태가 아님 · portone_error: 그 밖의 포트원 오류
+export async function getPaidPayment(
+  paymentId: string,
+): Promise<PaidPayment | "unavailable" | "portone_auth" | "not_found" | "not_paid" | "portone_error"> {
   const h = headers();
   if (!h) return "unavailable";
   const res = await fetch(`${API}/payments/${encodeURIComponent(paymentId)}`, { headers: h, cache: "no-store" });
-  if (!res.ok) return null;
+  if (res.status === 401 || res.status === 403) return "portone_auth";
+  if (res.status === 404) return "not_found";
+  if (!res.ok) return "portone_error";
   const body = await res.json();
-  if (body.status !== "PAID" || body.currency !== "KRW" || typeof body.amount?.total !== "number") return null;
+  if (body.status !== "PAID" || body.currency !== "KRW" || typeof body.amount?.total !== "number") return "not_paid";
   let customData: Record<string, unknown> = {};
   try {
     customData = typeof body.customData === "string" ? JSON.parse(body.customData) : (body.customData ?? {});

@@ -5,7 +5,8 @@ import { createClient } from "@/lib/supabase/server";
 
 // 결제 확인 → 매칭 횟수 지급
 //   body: { paymentId }
-// 응답: { result: "ok" | "duplicate" | "already_paid" | "not_active" | "invalid" | "unavailable" | "error" }
+// 응답: { result: "ok" | "duplicate" | "already_paid" | "not_active" | "invalid" | "unavailable"
+//          | "portone_auth" | "not_found" | "not_paid" | "portone_error" | "error" }
 //
 // 클라이언트가 보낸 금액·종류는 믿지 않는다. 포트원에서 결제 건을 직접 조회하고,
 // customData 의 uid 가 로그인한 계정과 같을 때만 DB(record_payment)에 기록한다. 금액도 DB가 다시 확인한다.
@@ -22,8 +23,10 @@ export async function POST(req: Request) {
   if (typeof body.paymentId !== "string") return NextResponse.json({ result: "error" }, { status: 400 });
 
   const payment = await getPaidPayment(body.paymentId);
-  if (payment === "unavailable") return NextResponse.json({ result: "unavailable" }, { status: 503 });
-  if (!payment || payment.customData.uid !== user.id) return NextResponse.json({ result: "invalid" }, { status: 400 });
+  if (typeof payment === "string") {
+    return NextResponse.json({ result: payment }, { status: payment === "unavailable" ? 503 : 400 });
+  }
+  if (payment.customData.uid !== user.id) return NextResponse.json({ result: "invalid" }, { status: 400 });
   const kind = payment.customData.kind;
   if (kind !== "signup" && kind !== "pack") return NextResponse.json({ result: "invalid" }, { status: 400 });
 

@@ -2,7 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
-import { confirmPayment, PAY_ERRORS } from "@/lib/pay";
+import { confirmPayment, payMessage } from "@/lib/pay";
 
 // 모바일에서 결제창이 페이지 이동 방식으로 끝났을 때 돌아오는 곳 (가입비·매칭 구매 공통)
 function Complete() {
@@ -18,8 +18,14 @@ function Complete() {
       return;
     }
     confirmPayment(id).then((result) => {
-      if (result === "ok" || result === "duplicate") router.replace(params.get("next") === "me" ? "/me/credits" : "/signup/phone");
-      else setMsg(PAY_ERRORS[result] ?? "결제를 확인하지 못했어요. 다시 시도해 주세요.");
+      const back = params.get("next") === "me" ? "/me/credits" : "/signup/pay";
+      const m = payMessage(result);
+      if (!m) router.replace(params.get("next") === "me" ? "/me/credits" : "/signup/phone");
+      else {
+        setMsg(m);
+        // 재확인 버튼이 있는 화면으로 돌려보낸다
+        setTimeout(() => router.replace(back), 2500);
+      }
     });
   }, [params, router]);
 
