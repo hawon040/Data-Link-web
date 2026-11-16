@@ -1,22 +1,15 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, Headline, Screen } from "@/components/screen";
 import { BlockButton } from "@/components/ui";
+import { formatPhone, isPhone, recallPhone } from "@/lib/phone";
 
 // Figma 33 · 휴대폰 인증 분기 (13:83)
 // 포트원 V2 · KG이니시스 통합인증 창 → /api/identity 가 포트원에서 결과를 직접 조회하고 자동 분기
 // 인증 수단은 PASS(통신사)로 고정: 카카오·네이버는 성별을 사용자가 직접 입력해 검증되지 않아 같은 성별 매칭에 쓸 수 없다.
 // 만 19세 판정은 인증 결과의 생년월일로 DB(complete_identity)가 한다. 번호는 저장하지 않고, 인증한 번호와 같은지만 서버가 확인한다.
-
-// 숫자만 남기고 010-1234-5678 형태로 표시
-function formatPhone(digits: string) {
-  if (digits.length < 4) return digits;
-  if (digits.length < 8) return `${digits.slice(0, 3)}-${digits.slice(3)}`;
-  if (digits.length === 10) return `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6)}`;
-  return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`;
-}
 
 export const IDENTITY_ERRORS: Record<string, string> = {
   duplicate: "이미 다른 계정으로 인증된 휴대폰이에요. 결제한 가입비는 자동으로 환불돼요.",
@@ -30,7 +23,12 @@ export default function PhoneView({ userId, preview = false }: { userId?: string
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [phone, setPhone] = useState("");
-  const phoneValid = /^01[016789]\d{7,8}$/.test(phone);
+  const phoneValid = isPhone(phone);
+  // 가입비 결제 때 입력한 번호로 미리 채움
+  useEffect(() => {
+    const saved = recallPhone();
+    if (saved) setPhone(saved);
+  }, []);
 
   async function verify() {
     if (preview) return router.push("/preview/14");

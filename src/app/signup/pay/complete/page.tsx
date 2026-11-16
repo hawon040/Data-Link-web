@@ -13,7 +13,8 @@ function Complete() {
   useEffect(() => {
     const id = params.get("paymentId");
     if (!id || params.get("code")) {
-      setMsg("결제가 취소됐거나 실패했어요.");
+      const reason = params.get("message");
+      setMsg(reason ? `결제가 취소됐거나 실패했어요. (${reason})` : "결제가 취소됐거나 실패했어요.");
       return;
     }
     confirmPayment(id).then((result) => {

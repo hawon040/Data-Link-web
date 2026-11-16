@@ -24,25 +24,53 @@ export async function confirmPayment(paymentId: string): Promise<string> {
   return result as string;
 }
 
-// 결제 → 서버 확인까지. 결과: "ok" | "duplicate" | "cancelled" | 오류 코드
-export async function payAndConfirm(kind: PayKind, userId: string, returnPath: string): Promise<string> {
+export type PayCustomer = { email?: string; phone: string; name?: string };
+
+// 결제 → 서버 확인까지. 결과: "ok" | "duplicate" | "cancelled" | "failed:메시지" | 오류 코드
+// KG이니시스는 구매자 이름·휴대폰·이메일이 있어야 결제창이 열린다.
+export async function payAndConfirm(
+  kind: PayKind,
+  userId: string,
+  returnPath: string,
+  customer: PayCustomer,
+): Promise<string> {
   const storeId = process.env.NEXT_PUBLIC_PORTONE_STORE_ID;
   const channelKey = process.env.NEXT_PUBLIC_PORTONE_PAY_CHANNEL_KEY;
   if (!storeId || !channelKey) return "unavailable";
-  const PortOne = await import("@portone/browser-sdk/v2");
-  const paymentId = `pay-${crypto.randomUUID()}`;
   const product = PAY_PRODUCTS[kind];
-  const res = await PortOne.requestPayment({
-    storeId,
-    channelKey,
-    paymentId,
-    orderName: product.orderName,
-    totalAmount: product.amount,
-    currency: "KRW",
-    payMethod: "CARD",
-    customData: { uid: userId, kind },
-    redirectUrl: `${window.location.origin}${returnPath}`,
-  });
-  if (!res || res.code !== undefined) return "cancelled";
+  const paymentId = `pay-${crypto.randomUUID()}`;
+  try {
+    const PortOne = await import("@portone/browser-sdk/v2");
+    const res = await PortOne.requestPayment({
+      storeId,
+      channelKey,
+      paymentId,
+      orderName: product.orderName,
+      totalAmount: product.amount,
+      currency: "KRW",
+      payMethod: "CARD",
+      customer: {
+        fullName: customer.name || "RANPICK 회원",
+        phoneNumber: customer.phone,
+        email: customer.email,
+      },
+      customData: { uid: userId, kind },
+      redirectUrl: `${window.location.origin}${returnPath}`,
+    });
+    if (!res) return "cancelled";
+    if (res.code !== undefined) {
+      return res.code === "FAILURE_TYPE_PG" && /취소|cancel/i.test(res.message ?? "") ? "cancelled" : `failed:${res.message ?? res.code}`;
+    }
+  } catch (e) {
+    return `failed:${e instanceof Error ? e.message : "결제창을 열지 못했어요"}`;
+  }
   return confirmPayment(paymentId);
+}
+
+// 결과 코드 → 화면 문구 (성공이면 null)
+export function payMessage(result: string): string | null {
+  if (result === "ok" || result === "duplicate") return null;
+  if (result === "cancelled") return "결제가 취소됐어요.";
+  if (result.startsWith("failed:")) return `결제창 오류: ${result.slice(7)}`;
+  return PAY_ERRORS[result] ?? "결제를 확인하지 못했어요. 다시 시도해 주세요.";
 }
