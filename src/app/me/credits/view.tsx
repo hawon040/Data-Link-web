@@ -43,7 +43,7 @@ export default function CreditsView({
     setDone(false);
     setBusy(true);
     try {
-      const result = await payAndConfirm("pack", userId, "/signup/pay/complete?next=me", { email, phone, name: nickname });
+      const result = await payAndConfirm("pack", userId, "/me/credits/complete", { email, phone, name: nickname });
       const msg = payMessage(result);
       if (!msg) {
         setDone(true);

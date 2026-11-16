@@ -69,6 +69,8 @@ export async function payAndConfirm(
   if (!storeId || !channelKey) return "unavailable";
   const product = PAY_PRODUCTS[kind];
   const paymentId = `pay-${crypto.randomUUID()}`;
+  // 결제창이 페이지 이동 방식으로 끝나도 다시 확인할 수 있게 먼저 보관
+  setPending(paymentId);
   try {
     const PortOne = await import("@portone/browser-sdk/v2");
     const res = await PortOne.requestPayment({
@@ -87,8 +89,12 @@ export async function payAndConfirm(
       customData: { uid: userId, kind },
       redirectUrl: `${window.location.origin}${returnPath}`,
     });
-    if (!res) return "cancelled";
+    if (!res) {
+      setPending(null);
+      return "cancelled";
+    }
     if (res.code !== undefined) {
+      setPending(null);
       return res.code === "FAILURE_TYPE_PG" && /취소|cancel/i.test(res.message ?? "") ? "cancelled" : `failed:${res.message ?? res.code}`;
     }
   } catch (e) {
