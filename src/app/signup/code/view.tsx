@@ -34,7 +34,7 @@ export default function CodeView({ email, preview = false }: { email: string; pr
       return setError("코드가 맞지 않거나 만료됐어요.");
     }
     const { data: status } = await supabase.rpc("my_status");
-    router.push(status === "active" ? "/home" : status === "need_profile" ? "/signup/profile" : status === "need_kakao" ? "/signup/kakao" : "/signup/phone");
+    router.push(status === "active" ? "/home" : status === "need_profile" ? "/signup/profile" : status === "need_kakao" ? "/signup/kakao" : status === "need_payment" ? "/signup/pay" : "/signup/phone");
   }
 
   async function resend() {

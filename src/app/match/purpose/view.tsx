@@ -29,6 +29,8 @@ export default function PurposeView({
     setBusy(true);
     const { error } = await createClient().rpc("apply_match", { p_purpose: p });
     setBusy(false);
+    // 남은 매칭이 없으면 구매 화면으로
+    if (error?.message.includes("NO_CREDITS")) return router.push("/me/credits");
     if (error) return setError("신청하지 못했어요. 잠시 후 다시 시도해 주세요.");
     router.push("/match/applied");
   }

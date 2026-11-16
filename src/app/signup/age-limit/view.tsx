@@ -52,6 +52,7 @@ export default function AgeLimitView({ preview = false }: { preview?: boolean })
         <br />
         진행되지 않습니다.
       </div>
+      <p className="mt-3 text-center text-[12px] text-muted">결제한 가입비 1,000원은 자동으로 환불돼요.</p>
     </Screen>
   );
 }

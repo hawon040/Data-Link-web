@@ -40,11 +40,13 @@ import VerifiedView from "@/app/signup/verified/view";
 import SignupStartView from "@/app/signup/view";
 import StatsView from "@/app/stats/view";
 import TodayView from "@/app/today/today-view";
+import CreditsView from "@/app/me/credits/view";
+import PayView from "@/app/signup/pay/view";
 import type { Prefs } from "@/lib/prefs";
 
 export const dynamic = "force-dynamic";
 
-// 개발용 디자인 확인: /preview/01 ~ /preview/46 (Figma 화면 번호) + withdraw · withdrawn · terms · privacy
+// 개발용 디자인 확인: /preview/01 ~ /preview/46 (Figma 화면 번호) + withdraw · withdrawn · terms · privacy · pay · credits
 // Supabase 없이 예시 데이터로 렌더. 배포 환경에서는 ENABLE_PREVIEW 없으면 404.
 const B = "/preview";
 const prefs: Prefs = { purpose: "friend", sameGenderOnly: false, includeSameDept: true, targetGrade: null };
@@ -107,6 +109,8 @@ function screen(n: string) {
     case "withdraw": return <WithdrawView preview />;
     case "withdrawn": return <WithdrawnView preview />;
     case "reports": return <ReportsView backHref="/preview/29" reports={[{ reported_at: "2026-10-14T03:00:00Z", reason: "harassment", detail: "대화 도중 불쾌한 메시지가 있었어요." }]} />;
+    case "pay": return <PayView preview />;
+    case "credits": return <CreditsView preview credits={1} packPrice={1000} packCredits={2} />;
     case "terms": return <TermsView backHref="/preview/02" />;
     case "privacy": return <PrivacyPolicyView backHref="/preview/02" />;
     default: return null;

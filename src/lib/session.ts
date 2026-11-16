@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 
 export type Status =
   | "signed_out"
+  | "need_payment"
   | "need_identity"
   | "need_profile"
   | "need_kakao"
@@ -13,6 +14,7 @@ export type Status =
 
 const NEXT_STEP: Record<Exclude<Status, "active">, string> = {
   signed_out: "/",
+  need_payment: "/signup/pay",
   need_identity: "/signup/phone",
   need_profile: "/signup/profile",
   need_kakao: "/signup/kakao",

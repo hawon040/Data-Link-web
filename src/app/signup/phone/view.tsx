@@ -19,9 +19,10 @@ function formatPhone(digits: string) {
 }
 
 export const IDENTITY_ERRORS: Record<string, string> = {
-  duplicate: "이미 다른 계정으로 인증된 휴대폰이에요.",
+  duplicate: "이미 다른 계정으로 인증된 휴대폰이에요. 결제한 가입비는 자동으로 환불돼요.",
   mismatch: "입력한 번호와 인증한 휴대폰 번호가 달라요.",
   unavailable: "본인인증 서비스를 준비 중이에요. 잠시 후 다시 시도해 주세요.",
+  need_payment: "가입비 결제를 먼저 마쳐 주세요.",
 };
 
 export default function PhoneView({ userId, preview = false }: { userId?: string; preview?: boolean }) {
@@ -63,6 +64,7 @@ export default function PhoneView({ userId, preview = false }: { userId?: string
       const { result } = await r.json().catch(() => ({ result: "error" }));
       if (result === "ok") router.push("/signup/verified");
       else if (result === "underage") router.push("/signup/age-limit");
+      else if (result === "need_payment") router.push("/signup/pay");
       else setError(IDENTITY_ERRORS[result] ?? "인증을 확인하지 못했어요. 다시 시도해 주세요.");
     } finally {
       setBusy(false);

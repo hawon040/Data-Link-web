@@ -1,11 +1,13 @@
 import { createHash } from "node:crypto";
 import { createClient as createAdmin } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
+import { cancelPayment } from "@/lib/portone-server";
 import { createClient } from "@/lib/supabase/server";
 
 // 휴대폰 본인인증 결과 확인 → DB 저장
 //   body: { identityVerificationId } (포트원 V2, KG이니시스 통합인증 · PASS)
-// 응답: { result: "ok" | "underage" | "duplicate" | "mismatch" | "unavailable" | "error" }
+// 응답: { result: "ok" | "underage" | "duplicate" | "need_payment" | "mismatch" | "unavailable" | "error" }
+// underage·duplicate 이면 가입비(1,000원)를 포트원에서 취소하고 DB에 환불로 표시한다.
 //
 // 클라이언트가 보낸 값은 믿지 않고, 포트원 API로 인증 건을 직접 조회해서 판단한다.
 //   GET https://api.portone.io/identity-verifications/{id}  (Authorization: PortOne {secret})
@@ -72,6 +74,17 @@ export async function POST(req: Request) {
     p_ci_hash: ciHash,
   });
   if (error) return NextResponse.json({ result: "error" }, { status: 500 });
+
+  // 만 19세 미만이거나 이미 가입된 휴대폰이면 가입비를 환불한다 (포트원 취소가 성공했을 때만 DB에 환불 표시)
+  if (data === "underage" || data === "duplicate") {
+    const { data: paymentId } = await admin.rpc("signup_payment_to_refund", { p_user: user.id });
+    if (typeof paymentId === "string") {
+      const reason = data === "underage" ? "만 19세 미만 가입 불가" : "이미 가입된 휴대폰";
+      if (await cancelPayment(paymentId, `RANPICK 가입비 자동 환불: ${reason}`)) {
+        await admin.rpc("refund_signup_payment", { p_user: user.id });
+      }
+    }
+  }
 
   // 가입 첫 화면(02)에서 받은 약관 동의 시각을 프로필에 기록
   if (data === "ok") {

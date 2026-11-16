@@ -22,6 +22,7 @@ export type MeData = {
   applied?: boolean; // 내일 매칭을 이미 신청했는지
   avatarUrl?: string | null;
   isAdmin?: boolean; // 운영자 권한이 하나라도 있으면 운영자 화면 링크를 보여준다
+  credits?: number; // 남은 매칭 횟수
 };
 
 export default function MeView({ data, preview = false }: { data: MeData; preview?: boolean }) {
@@ -45,7 +46,8 @@ export default function MeView({ data, preview = false }: { data: MeData; previe
     // 이미 내일 매칭을 신청했다면 바뀐 조건으로 다시 신청해 둔다
     const reapply = !error && rows?.length && "pref_same_gender_only" in patch && data.applied;
     const { error: applyError } = reapply ? await supabase.rpc("apply_match") : { error: null };
-    if (error || !rows?.length || applyError) {
+    // 남은 매칭이 0회면 어차피 매칭되지 않으므로 다시 신청 실패는 무시 (설정은 저장됨)
+    if (error || !rows?.length || (applyError && !applyError.message.includes("NO_CREDITS"))) {
       revert();
       setError("설정을 저장하지 못했어요. 다시 시도해 주세요.");
     }
@@ -105,6 +107,13 @@ export default function MeView({ data, preview = false }: { data: MeData; previe
           />
         </div>
         <PushToggle preview={preview} />
+        <Link
+          href={preview ? "/preview/08" : "/me/credits"}
+          className="flex h-[63px] items-center justify-between border-b border-ink text-[15px] font-medium"
+        >
+          <span>남은 매칭</span>
+          <span className="text-[14px] font-bold whitespace-pre">{`${data.credits ?? 0}회 · 구매  →`}</span>
+        </Link>
         <Link href={preview ? "/preview/28" : "/me/blocks"} className="flex h-[68px] items-center text-[15px] font-medium">
           차단한 학우 관리
         </Link>
