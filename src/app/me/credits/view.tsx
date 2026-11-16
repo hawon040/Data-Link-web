@@ -99,7 +99,7 @@ export default function CreditsView({
       {done && <p className="mt-3 text-[12px]">구매가 완료됐어요. 매칭 {packCredits}회가 추가됐어요.</p>}
       {error && <p className="mt-3 text-[12px] text-alert">{error}</p>}
       <PayRetry
-        refreshKey={error}
+        onStart={() => setError(null)}
         onDone={() => {
           setError(null);
           setDone(true);

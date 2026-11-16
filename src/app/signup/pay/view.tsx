@@ -79,7 +79,7 @@ export default function PayView({ userId, email, preview = false }: { userId?: s
         만 19세 미만이거나 이미 가입된 휴대폰이면 결제한 1,000원은 자동으로 환불돼요.
       </p>
       {error && <p className="mt-3 text-[12px] text-alert">{error}</p>}
-      <PayRetry refreshKey={error} onDone={() => router.push("/signup/phone")} />
+      <PayRetry onStart={() => setError(null)} onDone={() => router.push("/signup/phone")} />
     </Screen>
   );
 }

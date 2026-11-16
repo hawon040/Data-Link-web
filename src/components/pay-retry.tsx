@@ -4,7 +4,15 @@ import { useEffect, useState } from "react";
 import { payMessage, pendingPayment, retryPendingPayment } from "@/lib/pay";
 
 // 결제는 됐는데 서버 확인에 실패했을 때: 다시 결제하지 않고 같은 결제를 재확인
-export default function PayRetry({ onDone, refreshKey }: { onDone: () => void; refreshKey?: unknown }) {
+export default function PayRetry({
+  onDone,
+  onStart,
+  refreshKey,
+}: {
+  onDone: () => void;
+  onStart?: () => void; // 다시 확인을 누르면 화면의 이전 오류 문구를 지운다 (같은 문구가 두 번 보이지 않게)
+  refreshKey?: unknown;
+}) {
   const [pending, setPending] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
@@ -16,6 +24,7 @@ export default function PayRetry({ onDone, refreshKey }: { onDone: () => void; r
   if (!pending) return null;
 
   async function retry() {
+    onStart?.();
     setBusy(true);
     setMsg(null);
     const result = await retryPendingPayment();
